@@ -3,729 +3,766 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Penilaian Lomba Lovebird</title>
+<title>Backend - Rekap Penilaian Lovebird</title>
 <style>
   :root{
     --teal-deep: #1E3A34;
     --teal-mid: #2F5C50;
     --gold: #E3A63D;
-    --gold-soft: #F3D9A6;
-    --cream: #FBF7EE;
     --ink: #1B2420;
     --merah: #D64545;
     --biru: #3568C4;
     --kuning: #E0B027;
-    --hijau-ok: #2F855A;
-    --line: #DDD3BE;
-    --radius: 14px;
+    --line: #C9C9C9;
+    --sheet-header: #F1F3F4;
   }
-  *{box-sizing:border-box;}
+  *{ box-sizing:border-box; }
   body{
     margin:0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--cream);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background:#E9EAED;
     color: var(--ink);
-    padding-bottom: 60px;
   }
   body.no-scroll{ overflow:hidden; height:100%; }
-  header{
+  .topbar{
     background: var(--teal-deep);
-    color: var(--cream);
-    padding: 22px 20px 26px;
-    border-bottom: 5px solid var(--gold);
+    color:#fff;
+    padding: 14px 20px;
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
+    align-items:center;
+    flex-wrap:wrap;
     gap:10px;
   }
-  header h1{ margin:0; font-size: 1.4rem; letter-spacing: 0.02em; }
-  header p{
-    margin: 6px 0 0; font-size: 0.85rem; color: var(--gold-soft);
-    display:flex; align-items:center; gap:6px;
+  .topbar h1{ margin:0; font-size:1.15rem; }
+  .topbar .status{ font-size:0.8rem; color:#F3D9A6; }
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .actions button{
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight:600;
+    cursor:pointer;
   }
-  .dot{ width:8px;height:8px;border-radius:50%; background:#4ADE80; display:inline-block;
-    box-shadow:0 0 0 0 rgba(74,222,128,0.6); animation: pulse 2s infinite; }
-  .dot.off{ background:#EF4444; animation:none; }
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(74,222,128,0.6);}
-    70%{box-shadow:0 0 0 8px rgba(74,222,128,0);}
-    100%{box-shadow:0 0 0 0 rgba(74,222,128,0);}
-  }
-  .juri-info{ text-align:right; font-size:0.82rem; }
-  .juri-info .nama{ font-weight:700; color:#fff; }
-  .btn-logout{
-    margin-top:6px; background:transparent; border:1px solid var(--gold-soft);
-    color: var(--gold-soft); font-size:0.75rem; padding:4px 10px; border-radius:20px; cursor:pointer;
+  .btn-print{ background: var(--gold); color: var(--teal-deep); }
+  .btn-reset{ background:#F1EEE4; color: var(--merah); }
+
+  .wrap{
+    max-width: 100%;
+    margin: 20px;
+    padding: 0;
   }
 
-  main{ max-width: 640px; margin: 0 auto; padding: 20px 16px 0; }
+  .settings-card{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+  }
+  .settings-card h2{
+    margin: 0 0 14px;
+    font-size: 1rem;
+    color: var(--teal-deep);
+  }
+  .settings-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+  }
+  .settings-field label{
+    display:block;
+    font-size: 0.75rem;
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing:0.03em;
+    color: var(--teal-mid);
+    margin-bottom: 5px;
+  }
+  .settings-field input,
+  .settings-field select{
+    width:100%;
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    font-size: 0.95rem;
+    background:#fff;
+    color: var(--ink);
+  }
+  .settings-field .tetap{
+    padding: 9px 10px;
+    border-radius: 7px;
+    border: 1px dashed var(--line);
+    background: #FAFAFA;
+    color:#666;
+    font-size: 0.95rem;
+  }
+  .settings-field .hint{
+    font-size:0.72rem;
+    color:#999;
+    margin-top:4px;
+  }
+  .cari-field .cari-row{ display:flex; gap:6px; }
+  .cari-field input{ flex:1; min-width:0; }
+  .btn-cari-gantangan{
+    flex-shrink:0; background: var(--teal-deep); color:#fff; border:none;
+    padding: 0 14px; border-radius: 7px; font-weight:700; cursor:pointer; font-size:0.95rem;
+  }
+  .btn-cari-gantangan:active{ background: var(--teal-mid); }
+  .cari-status{
+    display:none; align-items:center; gap:10px; flex-wrap:wrap;
+    background:#FFF8E1; border:1px solid #F0DBA0; border-radius:8px;
+    padding:8px 12px; margin-top:12px; font-size:0.85rem; color:#6B5A1E;
+  }
+  .cari-status.show{ display:flex; }
+  .cari-status strong{ color: var(--teal-deep); }
+  .btn-tampilkan-semua{
+    background:#fff; border:1px solid var(--teal-mid); color: var(--teal-mid);
+    padding:5px 12px; border-radius:16px; font-size:0.78rem; font-weight:700; cursor:pointer;
+  }
+  .btn-simpan{
+    margin-top: 14px;
+    background: var(--teal-deep);
+    color:#fff;
+    border:none;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-weight:600;
+    cursor:pointer;
+    font-size:0.88rem;
+  }
+  .saved-msg{
+    display:inline-block;
+    margin-left: 10px;
+    font-size: 0.8rem;
+    color: #2F855A;
+    opacity:0;
+    transition: opacity 0.3s ease;
+  }
+  .saved-msg.show{ opacity:1; }
 
-  .card{
-    background:#fff; border-radius: var(--radius); padding: 20px;
-    box-shadow: 0 2px 10px rgba(30,58,52,0.08); border: 1px solid var(--line); margin-bottom: 20px;
+  /* Ringkasan pengaturan (tampil di layar + jadi tabel saat dicetak) */
+  .ringkasan-wrap{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    overflow-x:auto;
   }
-  .card h2{ margin: 0 0 16px; font-size: 1.05rem; color: var(--teal-deep); }
-  .card p.hint{ margin:-10px 0 16px; font-size:0.8rem; color:#8A8272; }
+  .ringkasan-wrap h2{
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    color: var(--teal-deep);
+  }
+  table.ringkasan{
+    border-collapse: collapse;
+    width:100%;
+    font-size: 0.85rem;
+    min-width: 560px;
+  }
+  table.ringkasan th, table.ringkasan td{
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    text-align:center;
+  }
+  table.ringkasan thead th{
+    background: var(--sheet-header);
+    font-weight:700;
+    color:#333;
+  }
+  table.ringkasan td.kosong{ color:#AAA; font-style:italic; }
 
-  label{ display:block; font-size: 0.82rem; font-weight: 600; color: var(--teal-mid); margin-bottom: 6px; }
-  .field{ margin-bottom: 16px; }
-  select, input[type="text"], input[type="number"], input[type="password"]{
-    width:100%; padding: 12px 12px; border-radius: 10px; border: 1.5px solid var(--line);
-    font-size: 1rem; background:#fff; color: var(--ink);
+  /* SPREADSHEET STYLE */
+  .sheet-container{
+    background:#fff;
+    overflow-x:auto;
   }
-  select:focus, input:focus{ outline: none; border-color: var(--gold); }
+  table.sheet{
+    border-collapse: collapse;
+    width:100%;
+    font-size: 0.82rem;
+    font-family: "Segoe UI", Arial, sans-serif;
+    min-width: 900px;
+  }
+  table.sheet th, table.sheet td{
+    border: 1px solid var(--line);
+    padding: 6px 8px;
+    text-align:center;
+    white-space: nowrap;
+  }
+  table.sheet thead th{
+    background: var(--sheet-header);
+    font-weight:700;
+    color:#333;
+    position: sticky;
+    top:0;
+    z-index:2;
+  }
+  table.sheet tbody tr { background:#FFF; }
+  table.sheet tbody tr:nth-child(even){ background:#FFF; }
+  table.sheet tbody tr:hover{ background:#EEF6FF; }
+  table.sheet tbody tr.baris-seimbang{ background:#FFFB45 !important; }
+  table.sheet tbody tr.baris-ditandai{ background:#FFFB45 !important; }
+  td.col-juri{ text-align:left; font-weight:600; }
+  td.col-num{ font-variant-numeric: tabular-nums; }
+  td.dash{ color:#AAA; }
+  .cell-merah{ color: var(--merah); font-weight:700; }
+  .cell-biru{ color: var(--biru); font-weight:700; }
+  .cell-kuning{ color:#B8860B; font-weight:700; }
+  .cell-total{ font-weight:800; }
+  .cell-restart{ font-weight:800; }
+  .label-juara{
+    display:inline-block;
+    margin-left:4px;
+    font-size:0.7rem;
+    background: var(--gold);
+    color: var(--teal-deep);
+    padding:1px 5px;
+    border-radius:8px;
+  }
+  .kolom-aksi{ white-space:nowrap; }
+  .btn-hapus-baris, .btn-edit-baris{
+    border:none; background:transparent; cursor:pointer; font-size:0.9rem; padding:2px 5px;
+  }
+  .btn-hapus-baris{ color:#C0392B; }
+  .btn-edit-baris{ color: var(--teal-mid); }
+  .empty-row td{ padding: 26px 8px; color:#999; font-style: italic; white-space:normal; }
 
-  .points-row{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-  .point-field label{ display:flex; align-items:center; gap:6px; }
-  .swatch{ width:10px;height:10px;border-radius:50%; display:inline-block; }
-  .swatch.merah{ background:var(--merah); }
-  .swatch.biru{ background:var(--biru); }
-  .swatch.kuning{ background:var(--kuning); }
+  /* ============ MODAL EDIT DATA ============ */
+  .overlay-edit{
+    position: fixed; inset:0; background: rgb(20 24 22 / 80%); backdrop-filter: blur(5px);
+    display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;
+  }
+  .overlay-edit.hidden{ display:none; }
+  .edit-box{
+    background:#fff; border-radius:12px; padding:20px 22px; width:100%; max-width:max-content;
+    max-height:88vh; overflow-y:auto;
+  }
+  .edit-box h3{ margin:0 0 14px; color: var(--teal-deep); }
+  .edit-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px; }
+  .edit-field{ display:flex; flex-direction:column; gap:5px; }
+  .edit-field label{ font-size:0.75rem; font-weight:600; color:#555; }
+  .edit-field input, .edit-field select{
+    padding: 8px 9px; border-radius:7px; border:1px solid var(--line); font-size:0.92rem;
+  }
+  .edit-tandai{
+    display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600;
+    background:#FFFDE0; border:1px solid #F0E68C; border-radius:8px; padding:10px 12px; margin-bottom:12px;
+  }
+  .edit-tandai input{ width:16px; height:16px; }
+  .edit-error{ color:var(--merah); font-size:0.82rem; margin:0 0 10px; display:none; }
+  .edit-actions{ display:flex; gap:10px; }
+  .edit-actions button{
+    flex:1; padding:11px; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.9rem;
+  }
+  .btn-batal-edit{ background:#F1EEE4; color: var(--ink); }
+  .btn-simpan-edit{ background: var(--teal-deep); color:#fff; }
 
-  /* ============ PICKER GANTANGAN (kotak nilai + tombol ganti) ============ */
-  .picker-box{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    width:100%; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--line);
-    background:#fff; min-height:54px;
-  }
-  .picker-box.kosong{ cursor:pointer; }
-  .picker-box.kosong:active{ background:#F7F3E8; }
-  .picker-value{ font-size:1rem; color:#9A9282; }
-  .picker-box.terisi .picker-value{ font-size:1.6rem; font-weight:800; color: var(--teal-deep); }
-  .btn-ganti{
-    flex-shrink:0; background: transparent; border: 1.5px solid var(--teal-mid); color: var(--teal-mid);
-    font-size:0.78rem; font-weight:700; padding: 6px 14px; border-radius: 20px; cursor:pointer;
-  }
-  .btn-ganti:active{ background: var(--teal-mid); color:#fff; }
-  .btn-ganti.hidden{ display:none; }
+  .print-only{ display:none; }
+  h2.print-only{ text-align:center; }
 
-  /* ============ OVERLAY PILIH GANTANGAN (grid nomor 1-60) ============ */
-  .overlay-box-lebar{ max-width: 480px; max-height: 82vh; display:flex; flex-direction:column; }
-  .overlay-box-lebar h3{ margin:0 0 4px; color: var(--teal-deep); }
-  .overlay-box-lebar p.sub{ margin:0 0 14px; font-size: 0.82rem; color:#7A7264; }
-  .grid-gantangan{
-    display:grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
-    overflow-y:auto; padding: 2px; margin-bottom: 4px;
-  }
-  .btn-nomor{
-    padding: 12px 0; border-radius: 8px; border: 1.5px solid var(--line); background:#fff;
-    color: var(--ink); font-weight:700; font-size:0.95rem; cursor:pointer;
-  }
-  .btn-nomor:active{ background: var(--gold-soft); border-color: var(--gold); }
-  .btn-nomor.aktif{ background: var(--teal-deep); border-color: var(--teal-deep); color:#fff; }
-  .btn-tutup-overlay{
-    margin-top: 14px; width:100%; padding: 12px; border-radius:10px; border:none;
-    background:#F1EEE4; color: var(--ink); font-weight:700; cursor:pointer;
-  }
-  @media (min-width: 480px){ .grid-gantangan{ grid-template-columns: repeat(6, 1fr); } }
-
-  /* ============ GRID DESAIN BOX (huruf) ============ */
-  .grid-box{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .grid-box.diciutkan{ grid-template-columns: 1fr auto; align-items:center; }
-  .btn-huruf{
-    padding: 14px 0; border-radius: 10px; border: 1.5px solid var(--line); background:#fff;
-    color: var(--teal-deep); font-weight:800; font-size:1.1rem; cursor:pointer;
-  }
-  .btn-huruf:active{ background: var(--gold-soft); border-color: var(--gold); }
-  .btn-huruf.aktif{ background: var(--teal-deep); border-color: var(--teal-deep); color:#fff; }
-  .btn-huruf.hidden{ display:none; }
-
-  /* ============ OVERLAY KONFIRMASI (redesain) ============ */
-  .confirm-boxes{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .confirm-box{
-    background: var(--cream); border: 1px solid var(--line); border-radius: 10px;
-    padding: 12px 10px; text-align:center;
-  }
-  .confirm-box .label{
-    font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.03em;
-    color: var(--teal-mid); margin-bottom:6px;
-  }
-  .confirm-box .value{ font-size:1.7rem; font-weight:800; color: var(--teal-deep); }
-  .confirm-stick-row{
-    display:flex; justify-content:space-between; align-items:center;
-    padding: 12px 14px; border-radius: 10px; margin-bottom: 10px; font-weight:700; font-size:0.95rem;
-  }
-  .confirm-stick-row .nilai{ font-size:1.15rem; font-weight:800; }
-  .confirm-stick-row.merah{ background: rgba(214,69,69,0.12); color: var(--merah); }
-  .confirm-stick-row.biru{ background: rgba(53,104,196,0.12); color: var(--biru); }
-  .confirm-stick-row.kuning{ background: rgba(224,176,39,0.18); color:#8A6B0F; }
-  .confirm-note{
-    font-size:0.78rem; color:#7A7264; font-style:italic; text-align:center;
-    border-top: 1px dashed var(--line); padding-top: 12px; margin: 4px 0 0;
-  }
-
-  .btn-submit{
-    width:100%; padding: 14px; border:none; border-radius: 10px; background: var(--teal-deep);
-    color: #fff; font-size: 1rem; font-weight: 700; letter-spacing:0.02em; cursor:pointer; margin-top: 6px;
-  }
-  .btn-submit:active{ background: var(--teal-mid); }
-
-  .error-msg{ color: var(--merah); font-size: 0.85rem; margin-top: 8px; display:none; }
-
-  .table-scroll{ overflow-x:auto; }
-  table{ width:100%; border-collapse: collapse; font-size: 0.9rem; min-width: 560px; }
-  thead th{
-    text-align:left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em;
-    color: var(--teal-mid); padding: 6px 8px; border-bottom: 2px solid var(--line);
-  }
-  tbody td{ padding: 10px 8px; border-bottom: 1px solid var(--line); }
-  tbody tr:first-child{ background: #FDF6E3; }
-  .badge-box{
-    display:inline-block; width:22px;height:22px;line-height:22px; text-align:center; border-radius:6px;
-    background: var(--teal-deep); color:#fff; font-size:0.75rem; font-weight:700;
-  }
-  .point-cell{ font-weight:600; }
-  .empty-row td{ text-align:center; color:#9A9282; padding: 24px 8px; font-style: italic; }
-
-  .overlay{
-    position: fixed; inset:0; background: rgb(20 30 27 / 80%); display:flex; backdrop-filter: blur(5px);
-    align-items:center; justify-content:center; padding: 20px; z-index: 50;
-  }
-  .overlay.hidden{ display:none; }
-  .overlay-box{
-    background:#fff; border-radius: var(--radius); max-width: 400px; width:100%; padding: 22px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-  }
-  .overlay-box h3{ margin:0 0 4px; color: var(--teal-deep); }
-  .overlay-box p.sub{ margin:0 0 16px; font-size: 0.82rem; color:#7A7264; }
-  .confirm-row{
-    display:flex; justify-content:space-between; padding: 8px 0;
-    border-bottom: 1px dashed var(--line); font-size: 0.92rem;
-  }
-  .confirm-row span:first-child{ color:#7A7264; }
-  .confirm-row span:last-child{ font-weight:700; }
-  .overlay-actions{ display:flex; gap: 10px; margin-top: 18px; }
-  .overlay-actions button{
-    flex:1; padding: 12px; border-radius: 10px; border:none; font-weight:700; font-size: 0.95rem; cursor:pointer;
-  }
-  .btn-kembali{ background: var(--merah); color: #fff; }
-  .btn-konfirmasi{ background: var(--hijau-ok); color: #fff; }
-
-  /* Overlay sukses dengan animasi ceklis */
-  .overlay-sukses-box{
-    background:#fff; border-radius: var(--radius); max-width: 320px; width:100%;
-    padding: 32px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); text-align:center;
-  }
-  .checkmark-wrap{ display:flex; justify-content:center; margin-bottom: 16px; }
-  .checkmark{ width: 80px; height: 80px; border-radius: 50%; display:block; }
-  .checkmark-circle{
-    stroke: var(--hijau-ok); stroke-width: 3; stroke-miterlimit: 10;
-    fill: none; stroke-dasharray: 166; stroke-dashoffset: 166;
-    animation: circle-draw 0.5s cubic-bezier(0.65,0,0.45,1) forwards;
-  }
-  .checkmark-check{
-    transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
-    stroke: var(--hijau-ok); stroke-width: 4; stroke-linecap:round; stroke-linejoin:round; fill:none;
-    animation: check-draw 0.35s cubic-bezier(0.65,0,0.45,1) 0.5s forwards;
-  }
-  @keyframes circle-draw{ to{ stroke-dashoffset: 0; } }
-  @keyframes check-draw{ to{ stroke-dashoffset: 0; } }
-  .overlay-sukses-box h3{ margin:0 0 6px; color: var(--hijau-ok); font-size:1.15rem; }
-  .overlay-sukses-box p{ margin:0; font-size:0.88rem; color:#7A7264; }
-  .btn-tutup-sukses{
-    margin-top:20px; width:100%; padding:12px; border:none; border-radius:10px;
-    background: var(--teal-deep); color:#fff; font-weight:700; font-size:0.95rem; cursor:pointer;
-  }
-
-  #layarLogin{ max-width: 380px; margin: 60px auto; padding: 0 16px; }
-  #layarLogin .card{ text-align:left; }
-  #layarLogin h2{ text-align:center; }
-  .login-error{ color: var(--merah); font-size: 0.85rem; margin-top: 6px; display:none; text-align:center; }
-  .hidden{ display:none !important; }
-
-  /* ============ RESPONSIVE ============ */
-  @media (max-width: 380px){
-    .points-row{ grid-template-columns: 1fr; gap: 12px; }
-    header{ padding: 18px 14px 22px; }
-    header h1{ font-size: 1.2rem; }
-  }
-  @media (min-width: 768px){
-    main{ max-width: 720px; }
-    #layarLogin{ max-width: 420px; }
-    .card{ padding: 26px; }
-    header{ padding: 26px 32px 30px; }
+  /* ============ RESPONSIVE (layar) ============ */
+  @media (max-width: 640px){
+    .topbar{ padding: 12px 14px; }
+    .topbar h1{ font-size: 1rem; }
+    .actions button{ padding: 7px 10px; font-size: 0.78rem; }
+    .wrap{ padding: 0 0 40px; margin: 14px; }
+    .settings-card, .ringkasan-wrap{ padding: 14px; }
+    .settings-grid{ grid-template-columns: 1fr 1fr; }
   }
   @media (min-width: 1024px){
-    main{ max-width: 800px; }
-    body{ font-size: 1.03rem; }
-    .points-row{ gap: 14px; }
+    .wrap{ padding: 0 0px 20px; }
+    table.sheet{ font-size: 0.88rem; }
+  }
+
+  /* ============ CETAK A4 ============ */
+  @media print{
+    @page{ size: A4; margin: 0.5cm; }
+    body{ background:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
+    .topbar, .actions, .settings-card, .btn-hapus-baris, .btn-edit-baris, .overlay-edit{ display:none !important; }
+    .print-only{ display:block; }
+    .wrap{ max-width:none; margin:0; padding:0; }
+    .ringkasan-wrap{ border:none; padding:0 0 14px; margin-bottom:14px; overflow:visible; }
+    table.ringkasan{ font-size:14px; min-width:0; }
+    table.ringkasan th, table.ringkasan td{ padding:7px 8px; }
+    .sheet-container{ border:none; overflow:visible; }
+    table.sheet{ font-size: 14px !important; min-width:0; }
+    table.sheet th, table.sheet td{ padding:7px 8px; }
+    table.sheet tbody tr.baris-ditandai{ background:#FFFB45 !important; }
+    th.kolom-aksi, td.kolom-aksi{ display:none !important; }
+    table.sheet thead th{ position:static; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>Form - Quick Count</h1>
-    <p><span class="dot" id="statusDot"></span> <span id="statusText">Menghubungkan...</span></p>
-  </div>
-  <div class="juri-info hidden" id="juriInfo">
-    <div>Login sebagai</div>
-    <div class="nama" id="namaJuriTampil">-</div>
-    <button class="btn-logout" id="btnLogout">Keluar</button>
-  </div>
-</header>
-
-<div id="layarLogin">
-  <div class="card">
-    <h2>Login Juri</h2>
-    <form id="formLogin">
-      <div class="field">
-        <label for="namaJuri">Nama / Kode Juri</label>
-        <select id="namaJuri" required>
-          <option value="" disabled selected>Memuat daftar juri...</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="passwordJuri">Password</label>
-        <input type="password" id="passwordJuri" required placeholder="Masukkan password juri">
-      </div>
-      <button type="submit" class="btn-submit">Masuk</button>
-      <p class="login-error" id="loginError"></p>
-    </form>
+<div class="topbar">
+  <h1>Backend - Quick Count</h1>
+  <div class="status" id="statusText">Menghubungkan...</div>
+  <div class="actions">
+    <button class="btn-print" id="btnPrint">Cetak (A4)</button>
+    <button class="btn-reset" id="btnReset">Reset Semua Data</button>
   </div>
 </div>
 
-<main class="hidden" id="halamanUtama">
-  <div class="card">
-    <h2>Form Penilaian Juri</h2>
-    <p class="hint">Isi jumlah stick yang diperoleh peserta di masing-masing warna. Nilai poin dihitung otomatis oleh backend.</p>
-    <form id="formPenilaian">
-      <div class="field">
-        <label>No. Gantangan</label>
-        <div class="picker-box kosong" id="pickerGantangan">
-          <span class="picker-value" id="gantanganValueText">Pilih nomor gantangan</span>
-          <button type="button" class="btn-ganti hidden" id="btnGantiGantangan">Ganti</button>
-        </div>
-        <input type="hidden" id="gantangan" required>
-      </div>
+<div class="wrap">
 
-      <div class="field">
-        <label>Tag / Putaran</label>
-        <div class="grid-box" id="gridDesainBox">
-          <button type="button" class="btn-huruf" data-huruf="A">A</button>
-          <button type="button" class="btn-huruf" data-huruf="B">B</button>
-          <button type="button" class="btn-huruf" data-huruf="C">C</button>
-          <button type="button" class="btn-huruf" data-huruf="D">D</button>
-          <button type="button" class="btn-ganti hidden" id="btnGantiDesainBox">Ganti</button>
-        </div>
-        <input type="hidden" id="desainBox" required>
+  <div class="settings-card">
+    <h2>Pengaturan Kelas Lomba</h2>
+    <div class="settings-grid">
+      <div class="settings-field">
+        <label for="hargaTiket">Harga Tiket</label>
+        <input type="text" id="hargaTiket" placeholder="Contoh: Rp 10.000">
       </div>
-
-      <div class="field">
-        <label>Jumlah Stick</label>
-        <div class="points-row">
-          <div class="point-field">
-            <label for="stickMerah"><span class="swatch merah"></span>Merah</label>
-            <input type="number" id="stickMerah" min="0" inputmode="numeric" required>
-          </div>
-          <div class="point-field">
-            <label for="stickBiru"><span class="swatch biru"></span>Biru</label>
-            <input type="number" id="stickBiru" min="0" inputmode="numeric" required>
-          </div>
-          <div class="point-field">
-            <label for="stickKuning"><span class="swatch kuning"></span>Kuning</label>
-            <input type="number" id="stickKuning" min="0" inputmode="numeric" required>
-          </div>
+      <div class="settings-field">
+        <label for="kelasLomba">Kelas Lomba</label>
+        <input type="text" id="kelasLomba" placeholder="Contoh: TPS 2XP ...">
+      </div>
+      <div class="settings-field">
+        <label for="jenisBurung">Jenis Burung</label>
+        <select id="jenisBurung">
+          <option value="">Pilih jenis burung</option>
+          <option value="LB. BEBAS AKSI">LB. BEBAS AKSI</option>
+          <option value="LB. FIGHTER RC">LB. FIGHTER RC</option>
+          <option value="LB. BALIBU PROSPEK">LB. BALIBU PROSPEK</option>
+          <option value="LB. BALIBU DURASI">LB. BALIBU DURASI</option>
+        </select>
+      </div>
+      <div class="settings-field">
+        <label for="pointMerah">Point Merah</label>
+        <input type="number" id="pointMerah" placeholder="Isi setelah kocok manual">
+        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
+      </div>
+      <div class="settings-field">
+        <label for="pointRestart">Point Restart</label>
+        <input type="number" id="pointRestart" placeholder="Isi setelah kocok manual">
+        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
+      </div>
+      <div class="settings-field">
+        <label>Point Biru</label>
+        <div class="tetap" id="pointBiruTampil">40</div>
+      </div>
+      <div class="settings-field">
+        <label>Point Kuning</label>
+        <div class="tetap" id="pointKuningTampil">10</div>
+      </div>
+      <div class="settings-field cari-field">
+        <label for="cariGantangan">Cari No. Gantangan</label>
+        <div class="cari-row">
+          <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
+          <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
         </div>
       </div>
-
-      <button type="submit" class="btn-submit">Kirim Penilaian</button>
-      <p class="error-msg" id="errorMsg"></p>
-    </form>
+    </div>
+    <div class="cari-status" id="cariStatus">
+      <span id="cariStatusText"></span>
+      <button type="button" class="btn-tampilkan-semua" id="btnTampilkanSemua">Tampilkan Semua</button>
+    </div>
+    <button class="btn-simpan" id="btnSimpanSettings">Simpan Pengaturan</button>
+    <span class="saved-msg" id="savedMsg">Tersimpan</span>
   </div>
 
-  <div class="card" style="max-height: 320px; overflow-y: scroll;">
-    <h2>Hasil Input Juri (Live)</h2>
-    <div class="table-scroll">
-      <table>
+  <div class="ringkasan-wrap">
+    <h2 class="print-only" style="display:block; font-size:1.3rem; margin:0 0 2px;">KW8 ARENA - REKAP DIGITAL LOVEBIRD</h2>
+    <span style="display:block; font-size:0.65rem; text-align: center; margin-bottom: 12px;">© 2026 QUICK COUNT. All rights reserved.</span>
+    <table class="ringkasan">
+      <thead>
+        <tr>
+          <th>Harga Tiket</th>
+          <th>Kelas Lomba</th>
+          <th>Jenis Burung</th>
+          <th>Point Merah</th>
+          <th>Point Biru</th>
+          <th>Point Kuning</th>
+          <th>Point Restart</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="rHargaTiket" class="kosong">-</td>
+          <td id="rKelasLomba" class="kosong">-</td>
+          <td id="rJenisBurung" class="kosong">-</td>
+          <td id="rPointMerah" class="kosong">menunggu</td>
+          <td id="rPointBiru">40</td>
+          <td id="rPointKuning">10</td>
+          <td id="rPointRestart" class="kosong">menunggu</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ringkasan-wrap">
+    <div class="sheet-container">
+      <table class="sheet">
         <thead>
           <tr>
-            <th>No.</th>
+            <th>Gantangan</th>
             <th>Tag</th>
             <th>Juri</th>
-            <th>Merah</th>
-            <th>Biru</th>
-            <th>Kuning</th>
-            <th>Waktu</th>
+            <th>Stick Merah</th>
+            <th>Stick Biru</th>
+            <th>Stick Kuning</th>
+            <th>Point Merah</th>
+            <th>Point Biru</th>
+            <th>Point Kuning</th>
+            <th>Total Point</th>
+            <th>Hasil Restart</th>
+            <th class="kolom-aksi">Aksi</th>
           </tr>
         </thead>
         <tbody id="tabelBody">
-          <tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>
+          <tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>
         </tbody>
       </table>
     </div>
   </div>
-</main>
-
-<div class="overlay hidden" id="overlayGantangan">
-  <div class="overlay-box overlay-box-lebar">
-    <h3>Pilih No. Gantangan</h3>
-    <p class="sub">Ketuk salah satu nomor di bawah ini.</p>
-    <div class="grid-gantangan" id="gridGantangan"></div>
-    <button type="button" class="btn-tutup-overlay" id="btnTutupOverlayGantangan">Tutup</button>
-  </div>
 </div>
 
-<div class="overlay hidden" id="overlay">
-  <div class="overlay-box">
-    <h3>Konfirmasi Data</h3>
-    <p class="sub" id="cfJuriSub">Periksa kembali data sebelum dikirim.</p>
-    <div class="confirm-boxes">
-      <div class="confirm-box">
-        <div class="label">Gantangan</div>
-        <div class="value" id="cfGantangan"></div>
+<div class="overlay-edit hidden" id="overlayEdit">
+  <div class="edit-box">
+    <h3>Edit Data Penilaian</h3>
+    <div class="edit-grid">
+      <div class="edit-field">
+        <label>No. Gantangan</label>
+        <input type="number" id="editGantangan" min="1" max="60">
       </div>
-      <div class="confirm-box">
-        <div class="label">Tag</div>
-        <div class="value" id="cfBox"></div>
+      <div class="edit-field">
+        <label>Tag / Putaran</label>
+        <select id="editDesainBox">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      </div>
+      <div class="edit-field">
+        <label>Nama Juri</label>
+        <input type="text" id="editJuri">
+      </div>
+      <div class="edit-field"></div>
+      <div class="edit-field">
+        <label>Stick Merah</label>
+        <input type="number" id="editStickMerah" min="0">
+      </div>
+      <div class="edit-field">
+        <label>Stick Biru</label>
+        <input type="number" id="editStickBiru" min="0">
+      </div>
+      <div class="edit-field">
+        <label>Stick Kuning</label>
+        <input type="number" id="editStickKuning" min="0">
       </div>
     </div>
-    <div class="confirm-stick-row merah">
-      <span>Merah</span><span class="nilai" id="cfMerah"></span>
+    <label class="edit-tandai">
+      <input type="checkbox" id="editTandai">
+      Tandai baris ini (akan diberi warna kuning saat dicetak)
+    </label>
+    <p class="edit-error" id="editError"></p>
+    <div class="edit-actions">
+      <button class="btn-batal-edit" id="btnBatalEdit">Batal</button>
+      <button class="btn-simpan-edit" id="btnSimpanEdit">Simpan Perubahan</button>
     </div>
-    <div class="confirm-stick-row biru">
-      <span>Biru</span><span class="nilai" id="cfBiru"></span>
-    </div>
-    <div class="confirm-stick-row kuning">
-      <span>Kuning</span><span class="nilai" id="cfKuning"></span>
-    </div>
-    <p class="confirm-note">Catatan: Jika sudah benar silahkan klik tombol <strong>Konfirmasi</strong> untuk mengirim data ke server.</p>
-    <div class="overlay-actions">
-      <button class="btn-konfirmasi" id="btnKonfirmasi">Konfirmasi</button>
-      <button class="btn-kembali" id="btnKembali">Batal</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay hidden" id="overlaySukses">
-  <div class="overlay-sukses-box">
-    <div class="checkmark-wrap">
-      <svg class="checkmark" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-        <circle class="checkmark-circle" cx="30" cy="30" r="26"/>
-        <path class="checkmark-check" d="M17 30.5 L26 39 L43 20"/>
-      </svg>
-    </div>
-    <h3>Data Berhasil Terkirim</h3>
-    <p>Penilaian untuk gantangan <span id="suksesGantangan"></span> sudah tersimpan.</p>
-    <button class="btn-tutup-sukses" id="btnTutupSukses">Tutup</button>
   </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
+  socket.on('connect', () => statusText.textContent = 'Terhubung - live update aktif');
+  socket.on('disconnect', () => statusText.textContent = 'Terputus, mencoba menghubungkan ulang...');
 
-  socket.on('connect', () => {
-    statusDot.classList.remove('off');
-    statusText.textContent = 'Terhubung';
-  });
-  socket.on('disconnect', () => {
-    statusDot.classList.add('off');
-    statusText.textContent = 'Terputus, mencoba menghubungkan ulang...';
-  });
+  let currentSettings = { hargaTiket:'', kelasLomba:'', jenisBurung:'', pointMerah:null, pointRestart:null };
+  let pointTetap = { biru:40, kuning:10 };
+  let dataPenilaian = [];
+  let filterGantangan = null;
 
-  const layarLogin = document.getElementById('layarLogin');
-  const halamanUtama = document.getElementById('halamanUtama');
-  const juriInfo = document.getElementById('juriInfo');
-  const namaJuriSelect = document.getElementById('namaJuri');
-  const formLogin = document.getElementById('formLogin');
-  const loginError = document.getElementById('loginError');
-
-  let juriAktif = localStorage.getItem('juriAktif') || null;
-
-  function tampilkanHalamanUtama(nama){
-    layarLogin.classList.add('hidden');
-    halamanUtama.classList.remove('hidden');
-    juriInfo.classList.remove('hidden');
-    document.getElementById('namaJuriTampil').textContent = nama;
-  }
-
-  function tampilkanLogin(){
-    layarLogin.classList.remove('hidden');
-    halamanUtama.classList.add('hidden');
-    juriInfo.classList.add('hidden');
-  }
-
-  fetch('/api/daftar-juri')
-    .then(r => r.json())
-    .then(list => {
-      namaJuriSelect.innerHTML = '<option value="" disabled selected>Pilih nama juri</option>';
-      list.forEach(nama => {
-        const opt = document.createElement('option');
-        opt.value = nama;
-        opt.textContent = nama;
-        namaJuriSelect.appendChild(opt);
-      });
-      if(juriAktif){
-        namaJuriSelect.value = juriAktif;
-        tampilkanHalamanUtama(juriAktif);
-      }
-    })
-    .catch(() => {
-      namaJuriSelect.innerHTML = '<option value="" disabled selected>Gagal memuat daftar juri</option>';
-    });
-
-  formLogin.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginError.style.display = 'none';
-    const nama = namaJuriSelect.value;
-    const password = document.getElementById('passwordJuri').value;
-
-    try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nama, password })
-      });
-      const data = await res.json();
-      if(res.ok && data.ok){
-        localStorage.setItem('juriAktif', nama);
-        juriAktif = nama;
-        tampilkanHalamanUtama(nama);
-      } else {
-        loginError.textContent = data.message || 'Login gagal.';
-        loginError.style.display = 'block';
-      }
-    } catch(err){
-      loginError.textContent = 'Tidak dapat terhubung ke server.';
-      loginError.style.display = 'block';
-    }
-  });
-
-  document.getElementById('btnLogout').addEventListener('click', () => {
-    localStorage.removeItem('juriAktif');
-    juriAktif = null;
-    tampilkanLogin();
-  });
-
-  // ============ PICKER NO. GANTANGAN (overlay grid 1-60) ============
-  const gantanganHidden = document.getElementById('gantangan');
-  const pickerGantangan = document.getElementById('pickerGantangan');
-  const gantanganValueText = document.getElementById('gantanganValueText');
-  const btnGantiGantangan = document.getElementById('btnGantiGantangan');
-  const overlayGantangan = document.getElementById('overlayGantangan');
-  const gridGantangan = document.getElementById('gridGantangan');
-
-  for(let i=1;i<=60;i++){
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'btn-nomor';
-    btn.dataset.nomor = i;
-    btn.textContent = i;
-    btn.addEventListener('click', () => pilihGantangan(i));
-    gridGantangan.appendChild(btn);
-  }
-
-  function bukaOverlayGantangan(){
-    gridGantangan.querySelectorAll('.btn-nomor').forEach(btn => {
-      btn.classList.toggle('aktif', btn.dataset.nomor === gantanganHidden.value);
-    });
-    overlayGantangan.classList.remove('hidden');
-  }
-
-  function pilihGantangan(nomor){
-    gantanganHidden.value = nomor;
-    gantanganValueText.textContent = nomor;
-    pickerGantangan.classList.remove('kosong');
-    pickerGantangan.classList.add('terisi');
-    btnGantiGantangan.classList.remove('hidden');
-    overlayGantangan.classList.add('hidden');
-  }
-
-  function resetGantangan(){
-    gantanganHidden.value = '';
-    gantanganValueText.textContent = 'Pilih nomor gantangan';
-    pickerGantangan.classList.add('kosong');
-    pickerGantangan.classList.remove('terisi');
-    btnGantiGantangan.classList.add('hidden');
-  }
-
-  pickerGantangan.addEventListener('click', () => {
-    if(pickerGantangan.classList.contains('kosong')) bukaOverlayGantangan();
-  });
-  btnGantiGantangan.addEventListener('click', bukaOverlayGantangan);
-  document.getElementById('btnTutupOverlayGantangan').addEventListener('click', () => {
-    overlayGantangan.classList.add('hidden');
-  });
-
-  // ============ GRID DESAIN BOX (huruf A-D) ============
-  const desainBoxHidden = document.getElementById('desainBox');
-  const gridDesainBox = document.getElementById('gridDesainBox');
-  const btnGantiDesainBox = document.getElementById('btnGantiDesainBox');
-  const tombolHuruf = gridDesainBox.querySelectorAll('.btn-huruf');
-
-  tombolHuruf.forEach(btn => {
-    btn.addEventListener('click', () => {
-      desainBoxHidden.value = btn.dataset.huruf;
-      tombolHuruf.forEach(b => {
-        b.classList.toggle('aktif', b === btn);
-        b.classList.toggle('hidden', b !== btn);
-      });
-      gridDesainBox.classList.add('diciutkan');
-      btnGantiDesainBox.classList.remove('hidden');
-    });
-  });
-
-  btnGantiDesainBox.addEventListener('click', () => {
-    tombolHuruf.forEach(b => {
-      b.classList.remove('hidden');
-    });
-    gridDesainBox.classList.remove('diciutkan');
-    btnGantiDesainBox.classList.add('hidden');
-  });
-
-  function resetDesainBox(){
-    desainBoxHidden.value = '';
-    tombolHuruf.forEach(b => {
-      b.classList.remove('hidden', 'aktif');
-    });
-    gridDesainBox.classList.remove('diciutkan');
-    btnGantiDesainBox.classList.add('hidden');
-  }
-
-  const form = document.getElementById('formPenilaian');
-  const overlay = document.getElementById('overlay');
-  const overlaySukses = document.getElementById('overlaySukses');
-  const errorMsg = document.getElementById('errorMsg');
+  const hargaTiketInput = document.getElementById('hargaTiket');
+  const kelasLombaInput = document.getElementById('kelasLomba');
+  const jenisBurungInput = document.getElementById('jenisBurung');
+  const pointMerahInput = document.getElementById('pointMerah');
+  const pointRestartInput = document.getElementById('pointRestart');
   const tabelBody = document.getElementById('tabelBody');
+  const savedMsg = document.getElementById('savedMsg');
 
-  let pendingData = null;
-  let timeoutTutupSukses = null;
-
-  function tampilkanSukses(gantangan){
-    document.getElementById('suksesGantangan').textContent = gantangan;
-    overlaySukses.classList.remove('hidden');
-    // Re-trigger animasi ceklis setiap kali muncul
-    const svg = overlaySukses.querySelector('svg');
-    const clone = svg.cloneNode(true);
-    svg.parentNode.replaceChild(clone, svg);
-
-    clearTimeout(timeoutTutupSukses);
-    timeoutTutupSukses = setTimeout(() => {
-      overlaySukses.classList.add('hidden');
-    }, 2200);
+  function isiAtauStrip(val){
+    return (val !== undefined && val !== null && val !== '') ? val : null;
   }
 
-  document.getElementById('btnTutupSukses').addEventListener('click', () => {
-    clearTimeout(timeoutTutupSukses);
-    overlaySukses.classList.add('hidden');
-  });
+  // Mengubah "150000" atau "Rp150000" menjadi "150.000" (format ribuan Indonesia)
+  function formatRibuan(val){
+    if(val === undefined || val === null) return '';
+    const angka = String(val).replace(/[^0-9]/g, '');
+    if(angka === '') return '';
+    return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    errorMsg.style.display = 'none';
+  function renderSettings(){
+    hargaTiketInput.value = formatRibuan(currentSettings.hargaTiket);
+    kelasLombaInput.value = currentSettings.kelasLomba || '';
+    jenisBurungInput.value = currentSettings.jenisBurung || '';
+    pointMerahInput.value = currentSettings.pointMerah !== null && currentSettings.pointMerah !== undefined ? currentSettings.pointMerah : '';
+    pointRestartInput.value = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined ? currentSettings.pointRestart : '';
+    document.getElementById('pointBiruTampil').textContent = pointTetap.biru;
+    document.getElementById('pointKuningTampil').textContent = pointTetap.kuning;
 
-    if(!juriAktif){
-      tampilkanLogin();
-      return;
+    setRingkasan('rHargaTiket', formatRibuan(currentSettings.hargaTiket));
+    setRingkasan('rKelasLomba', currentSettings.kelasLomba);
+    setRingkasan('rJenisBurung', currentSettings.jenisBurung);
+    setRingkasan('rPointMerah', currentSettings.pointMerah, 'menunggu');
+    setRingkasan('rPointRestart', currentSettings.pointRestart, 'menunggu');
+    document.getElementById('rPointBiru').textContent = pointTetap.biru;
+    document.getElementById('rPointKuning').textContent = pointTetap.kuning;
+  }
+
+  function setRingkasan(id, val, placeholder){
+    const el = document.getElementById(id);
+    const isi = isiAtauStrip(val);
+    if(isi === null){
+      el.textContent = placeholder || '-';
+      el.classList.add('kosong');
+    } else {
+      el.textContent = isi;
+      el.classList.remove('kosong');
     }
+  }
 
-    const gantangan = gantanganHidden.value;
-    const desainBox = desainBoxHidden.value;
-    const stickMerah = document.getElementById('stickMerah').value;
-    const stickBiru = document.getElementById('stickBiru').value;
-    const stickKuning = document.getElementById('stickKuning').value;
+  hargaTiketInput.addEventListener('input', () => {
+    const posisiAsli = hargaTiketInput.selectionStart;
+    const panjangSebelum = hargaTiketInput.value.length;
+    hargaTiketInput.value = formatRibuan(hargaTiketInput.value);
+    const selisih = hargaTiketInput.value.length - panjangSebelum;
+    const posisiBaru = Math.max(0, posisiAsli + selisih);
+    hargaTiketInput.setSelectionRange(posisiBaru, posisiBaru);
+  });
 
-    if(!gantangan || !desainBox || stickMerah==='' || stickBiru==='' || stickKuning===''){
-      errorMsg.textContent = 'Mohon lengkapi semua data terlebih dahulu.';
-      errorMsg.style.display = 'block';
-      return;
+  document.getElementById('btnSimpanSettings').addEventListener('click', () => {
+    socket.emit('update-settings', {
+      hargaTiket: hargaTiketInput.value,
+      kelasLomba: kelasLombaInput.value,
+      jenisBurung: jenisBurungInput.value,
+      pointMerah: pointMerahInput.value,
+      pointRestart: pointRestartInput.value
+    });
+    savedMsg.classList.add('show');
+    setTimeout(() => savedMsg.classList.remove('show'), 1800);
+  });
+
+  socket.on('settings-updated', (settings) => {
+    currentSettings = settings;
+    renderSettings();
+    renderTabel();
+  });
+
+  document.getElementById('btnPrint').addEventListener('click', () => window.print());
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if(confirm('Yakin ingin menghapus SEMUA data penilaian? Tindakan ini tidak bisa dibatalkan.')){
+      socket.emit('reset-semua');
     }
-
-    pendingData = { gantangan, desainBox, stickMerah, stickBiru, stickKuning, juri: juriAktif };
-
-    document.getElementById('cfJuriSub').textContent = 'Juri: ' + juriAktif + ' — periksa kembali sebelum dikirim.';
-    document.getElementById('cfGantangan').textContent = gantangan;
-    document.getElementById('cfBox').textContent = desainBox;
-    document.getElementById('cfMerah').textContent = stickMerah;
-    document.getElementById('cfBiru').textContent = stickBiru;
-    document.getElementById('cfKuning').textContent = stickKuning;
-
-    overlay.classList.remove('hidden');
-  });
-
-  document.getElementById('btnKembali').addEventListener('click', () => {
-    overlay.classList.add('hidden');
-  });
-
-  document.getElementById('btnKonfirmasi').addEventListener('click', () => {
-    if(!pendingData) return;
-    socket.emit('kirim-penilaian', pendingData);
-    overlay.classList.add('hidden');
-  });
-
-  socket.on('error-penilaian', (msg) => {
-    errorMsg.textContent = msg;
-    errorMsg.style.display = 'block';
   });
 
   function formatWaktu(iso){
     const d = new Date(iso);
-    return d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    return d.toLocaleString('id-ID', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' });
   }
 
-  function buatBaris(entry){
-    const tr = document.createElement('tr');
-    tr.dataset.id = entry.id;
-    tr.innerHTML = `
-      <td><span class="badge-box">${entry.gantangan}</span></td>
-      <td>${entry.desainBox}</td>
-      <td>${entry.juri}</td>
-      <td class="point-cell">${entry.stickMerah}</td>
-      <td class="point-cell">${entry.stickBiru}</td>
-      <td class="point-cell">${entry.stickKuning}</td>
-      <td>${formatWaktu(entry.waktu)}</td>
-    `;
-    return tr;
+  function hitungSkor(entry){
+    const skorBiru = entry.stickBiru * pointTetap.biru;
+    const skorKuning = entry.stickKuning * pointTetap.kuning;
+    const merahSiap = currentSettings.pointMerah !== null && currentSettings.pointMerah !== undefined;
+    const skorMerah = merahSiap ? entry.stickMerah * currentSettings.pointMerah : null;
+    const total = merahSiap ? (skorMerah + skorBiru + skorKuning) : null;
+
+    const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined && currentSettings.pointRestart > 0;
+    // Total skor dikurangi berulang kali dengan point restart (modulo) sampai tidak bisa dikurangi lagi
+    let hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
+    // Jika hasilnya sama persis dengan total (artinya total belum pernah berhasil dikurangi
+    // sama sekali oleh point restart), maka dianggap pas/seimbang -> 0, dan ini juaranya.
+    if(hasilRestart !== null && hasilRestart === total){
+      hasilRestart = 0;
+    }
+
+    return { skorMerah, skorBiru, skorKuning, total, hasilRestart };
   }
 
-  function hapusEmptyRow(){
-    const emptyRow = tabelBody.querySelector('.empty-row');
-    if(emptyRow) emptyRow.remove();
-  }
-
-  socket.on('init-data', (payload) => {
-    const data = payload.penilaian || [];
+  function renderTabel(){
     tabelBody.innerHTML = '';
-    if(data.length === 0){
-      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
+    const sumberData = filterGantangan !== null
+      ? dataPenilaian.filter(p => p.gantangan === filterGantangan)
+      : dataPenilaian;
+
+    if(dataPenilaian.length === 0){
+      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>';
       return;
     }
-    [...data].reverse().forEach(entry => tabelBody.appendChild(buatBaris(entry)));
+    if(sumberData.length === 0){
+      tabelBody.innerHTML = `<tr class="empty-row"><td colspan="12">Data untuk No. Gantangan ${filterGantangan} tidak ditemukan.</td></tr>`;
+      return;
+    }
+    sumberData.forEach((entry) => {
+      const { skorMerah, skorBiru, skorKuning, total, hasilRestart } = hitungSkor(entry);
+      const seimbang = hasilRestart === 0;
+      const tr = document.createElement('tr');
+      tr.dataset.id = entry.id;
+      if(seimbang) tr.classList.add('baris-seimbang');
+      if(entry.ditandai) tr.classList.add('baris-ditandai');
+      tr.innerHTML = `
+        <td class="col-num">${entry.gantangan}</td>
+        <td>${entry.desainBox}</td>
+        <td class="col-juri">${entry.juri}</td>
+        <td class="col-num cell-merah">${entry.stickMerah}</td>
+        <td class="col-num cell-biru">${entry.stickBiru}</td>
+        <td class="col-num cell-kuning">${entry.stickKuning}</td>
+        <td class="col-num">${skorMerah === null ? '<span class="dash">menunggu</span>' : skorMerah}</td>
+        <td class="col-num">${skorBiru}</td>
+        <td class="col-num">${skorKuning}</td>
+        <td class="col-num cell-total">${total === null ? '<span class="dash">-</span>' : total}</td>
+        <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">WINNER</span>' : ''}</td>
+        <td class="kolom-aksi">
+          <button class="btn-edit-baris" data-id="${entry.id}" title="Edit / tandai baris ini">&#9998;</button>
+          <button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button>
+        </td>
+      `;
+      tabelBody.appendChild(tr);
+    });
+
+    tabelBody.querySelectorAll('.btn-hapus-baris').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(confirm('Hapus data baris ini?')){
+          socket.emit('hapus-penilaian', parseInt(btn.dataset.id));
+        }
+      });
+    });
+
+    tabelBody.querySelectorAll('.btn-edit-baris').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entry = dataPenilaian.find(p => p.id === parseInt(btn.dataset.id));
+        if(entry) bukaEdit(entry);
+      });
+    });
+  }
+
+  // ============ PENCARIAN NO. GANTANGAN ============
+  const cariGantanganInput = document.getElementById('cariGantangan');
+  const cariStatus = document.getElementById('cariStatus');
+  const cariStatusText = document.getElementById('cariStatusText');
+
+  function jalankanPencarian(){
+    const val = cariGantanganInput.value;
+    const num = parseInt(val);
+    if(val === '' || isNaN(num)){
+      cariGantanganInput.focus();
+      return;
+    }
+    filterGantangan = num;
+    const ditemukan = dataPenilaian.filter(p => p.gantangan === num).length;
+    cariStatusText.innerHTML = ditemukan > 0
+      ? `Menampilkan hasil untuk No. Gantangan <strong>${num}</strong> (${ditemukan} data).`
+      : `Tidak ada data untuk No. Gantangan <strong>${num}</strong>.`;
+    cariStatus.classList.add('show');
+    renderTabel();
+  }
+
+  function tampilkanSemuaData(){
+    filterGantangan = null;
+    cariGantanganInput.value = '';
+    cariStatus.classList.remove('show');
+    renderTabel();
+  }
+
+  document.getElementById('btnCariGantangan').addEventListener('click', jalankanPencarian);
+  cariGantanganInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      jalankanPencarian();
+    }
+  });
+  document.getElementById('btnTampilkanSemua').addEventListener('click', tampilkanSemuaData);
+
+  socket.on('init-data', (payload) => {
+    dataPenilaian = payload.penilaian || [];
+    currentSettings = payload.settings || currentSettings;
+    pointTetap = payload.pointTetap || pointTetap;
+    renderSettings();
+    renderTabel();
   });
 
   socket.on('penilaian-baru', (entry) => {
-    hapusEmptyRow();
-    tabelBody.insertBefore(buatBaris(entry), tabelBody.firstChild);
-
-    if(pendingData && String(entry.gantangan) === String(pendingData.gantangan) && entry.juri === juriAktif){
-      form.reset();
-      resetGantangan();
-      resetDesainBox();
-      const gantanganTerkirim = pendingData.gantangan;
-      pendingData = null;
-      tampilkanSukses(gantanganTerkirim);
-    }
+    dataPenilaian.push(entry);
+    renderTabel();
   });
 
   socket.on('penilaian-dihapus', (id) => {
-    const row = tabelBody.querySelector(`tr[data-id="${id}"]`);
-    if(row) row.remove();
-    if(tabelBody.children.length === 0){
-      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
-    }
+    dataPenilaian = dataPenilaian.filter(p => p.id !== id);
+    renderTabel();
   });
 
   socket.on('semua-direset', () => {
-    tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
+    dataPenilaian = [];
+    tampilkanSemuaData();
+  });
+
+  // ============ MODAL EDIT DATA / TANDAI BARIS ============
+  const overlayEdit = document.getElementById('overlayEdit');
+  const editError = document.getElementById('editError');
+  let editingId = null;
+
+  function bukaEdit(entry){
+    editingId = entry.id;
+    document.getElementById('editGantangan').value = entry.gantangan;
+    document.getElementById('editDesainBox').value = entry.desainBox;
+    document.getElementById('editJuri').value = entry.juri;
+    document.getElementById('editStickMerah').value = entry.stickMerah;
+    document.getElementById('editStickBiru').value = entry.stickBiru;
+    document.getElementById('editStickKuning').value = entry.stickKuning;
+    document.getElementById('editTandai').checked = !!entry.ditandai;
+    editError.style.display = 'none';
+    overlayEdit.classList.remove('hidden');
+  }
+
+  function tutupEdit(){
+    overlayEdit.classList.add('hidden');
+    editingId = null;
+  }
+
+  document.getElementById('btnBatalEdit').addEventListener('click', tutupEdit);
+
+  document.getElementById('btnSimpanEdit').addEventListener('click', () => {
+    if(editingId === null) return;
+    socket.emit('edit-penilaian', {
+      id: editingId,
+      gantangan: document.getElementById('editGantangan').value,
+      desainBox: document.getElementById('editDesainBox').value,
+      juri: document.getElementById('editJuri').value,
+      stickMerah: document.getElementById('editStickMerah').value,
+      stickBiru: document.getElementById('editStickBiru').value,
+      stickKuning: document.getElementById('editStickKuning').value,
+      ditandai: document.getElementById('editTandai').checked
+    });
+  });
+
+  socket.on('penilaian-diedit', (entry) => {
+    const idx = dataPenilaian.findIndex(p => p.id === entry.id);
+    if(idx !== -1) dataPenilaian[idx] = entry;
+    renderTabel();
+    tutupEdit();
+  });
+
+  socket.on('error-penilaian', (msg) => {
+    if(!overlayEdit.classList.contains('hidden')){
+      editError.textContent = msg;
+      editError.style.display = 'block';
+    } else {
+      alert(msg);
+    }
   });
 
   // ============ KUNCI SCROLL HALAMAN UTAMA SAAT OVERLAY TAMPIL ============
   (function(){
-    const semuaOverlay = document.querySelectorAll('.overlay');
+    const semuaOverlay = document.querySelectorAll('.overlay, .overlay-edit');
     function perbaruiKunciScroll(){
       let adaYangTampil = false;
       semuaOverlay.forEach(el => { if(!el.classList.contains('hidden')) adaYangTampil = true; });
