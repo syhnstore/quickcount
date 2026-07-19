@@ -57,7 +57,6 @@ io.on('connection', (socket) => {
 
   socket.on('kirim-penilaian', (data) => {
     const gantangan = parseInt(data.gantangan);
-    const sesi = data.sesi ? data.sesi.toString().trim() : '';
     const desainBox = data.desainBox;
     const juri = data.juri ? data.juri.toString().trim() : '';
     const stickMerah = parseFloat(data.stickMerah);
@@ -66,7 +65,6 @@ io.on('connection', (socket) => {
 
     if (
       isNaN(gantangan) || gantangan < 1 || gantangan > 60 ||
-      !sesi ||
       !['A', 'B', 'C', 'D'].includes(desainBox) ||
       !DAFTAR_JURI.includes(juri) ||
       isNaN(stickMerah) || stickMerah < 0 ||
@@ -80,7 +78,6 @@ io.on('connection', (socket) => {
     const entry = {
       id: nextId++,
       gantangan,
-      sesi,
       desainBox,
       juri,
       stickMerah,
