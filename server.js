@@ -83,6 +83,7 @@ io.on('connection', (socket) => {
       stickMerah,
       stickBiru,
       stickKuning,
+      ditandai: false, // penanda highlight kuning (#fffb45), diatur lewat fitur edit di backend
       waktu: new Date().toISOString()
     };
 
@@ -93,6 +94,50 @@ io.on('connection', (socket) => {
   socket.on('hapus-penilaian', (id) => {
     penilaian = penilaian.filter((p) => p.id !== id);
     io.emit('penilaian-dihapus', id);
+  });
+
+  // Edit data yang sudah masuk (dipakai dari backend, lewat ikon pensil per baris).
+  // Sekaligus dipakai untuk menandai/menghapus tanda highlight kuning (#fffb45) pada baris.
+  socket.on('edit-penilaian', (data) => {
+    const id = parseInt(data.id);
+    const idx = penilaian.findIndex((p) => p.id === id);
+    if (idx === -1) {
+      socket.emit('error-penilaian', 'Data yang ingin diedit tidak ditemukan.');
+      return;
+    }
+
+    const gantangan = parseInt(data.gantangan);
+    const desainBox = data.desainBox;
+    const juri = data.juri ? data.juri.toString().trim() : '';
+    const stickMerah = parseFloat(data.stickMerah);
+    const stickBiru = parseFloat(data.stickBiru);
+    const stickKuning = parseFloat(data.stickKuning);
+    const ditandai = !!data.ditandai;
+
+    if (
+      isNaN(gantangan) || gantangan < 1 || gantangan > 60 ||
+      !['A', 'B', 'C', 'D'].includes(desainBox) ||
+      !DAFTAR_JURI.includes(juri) ||
+      isNaN(stickMerah) || stickMerah < 0 ||
+      isNaN(stickBiru) || stickBiru < 0 ||
+      isNaN(stickKuning) || stickKuning < 0
+    ) {
+      socket.emit('error-penilaian', 'Data tidak valid, silakan periksa kembali.');
+      return;
+    }
+
+    penilaian[idx] = {
+      ...penilaian[idx],
+      gantangan,
+      desainBox,
+      juri,
+      stickMerah,
+      stickBiru,
+      stickKuning,
+      ditandai
+    };
+
+    io.emit('penilaian-diedit', penilaian[idx]);
   });
 
   socket.on('reset-semua', () => {
