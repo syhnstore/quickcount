@@ -79,12 +79,15 @@
     color: var(--teal-mid);
     margin-bottom: 5px;
   }
-  .settings-field input{
+  .settings-field input,
+  .settings-field select{
     width:100%;
     padding: 9px 10px;
     border-radius: 7px;
     border: 1px solid var(--line);
     font-size: 0.95rem;
+    background:#fff;
+    color: var(--ink);
   }
   .settings-field .tetap{
     padding: 9px 10px;
@@ -206,6 +209,7 @@
   .empty-row td{ padding: 26px 8px; color:#999; font-style: italic; white-space:normal; }
 
   .print-only{ display:none; }
+  h2.print-only{ text-align:center; }
 
   /* ============ RESPONSIVE (layar) ============ */
   @media (max-width: 640px){
@@ -265,7 +269,13 @@
       </div>
       <div class="settings-field">
         <label for="jenisBurung">Jenis Burung</label>
-        <input type="text" id="jenisBurung" placeholder="Contoh: Lovebird Pastel">
+        <select id="jenisBurung">
+          <option value="">Pilih jenis burung</option>
+          <option value="LB. BEBAS AKSI">LB. BEBAS AKSI</option>
+          <option value="LB. FIGHTER RC">LB. FIGHTER RC</option>
+          <option value="LB. BALIBU PROSPEK">LB. BALIBU PROSPEK</option>
+          <option value="LB. BALIBU DURASI">LB. BALIBU DURASI</option>
+        </select>
       </div>
       <div class="settings-field">
         <label for="pointMerah">Point Merah (Kocokan 1)</label>
@@ -367,8 +377,16 @@
     return (val !== undefined && val !== null && val !== '') ? val : null;
   }
 
+  // Mengubah "150000" atau "Rp150000" menjadi "150.000" (format ribuan Indonesia)
+  function formatRibuan(val){
+    if(val === undefined || val === null) return '';
+    const angka = String(val).replace(/[^0-9]/g, '');
+    if(angka === '') return '';
+    return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
   function renderSettings(){
-    hargaTiketInput.value = currentSettings.hargaTiket || '';
+    hargaTiketInput.value = formatRibuan(currentSettings.hargaTiket);
     kelasLombaInput.value = currentSettings.kelasLomba || '';
     jenisBurungInput.value = currentSettings.jenisBurung || '';
     pointMerahInput.value = currentSettings.pointMerah !== null && currentSettings.pointMerah !== undefined ? currentSettings.pointMerah : '';
@@ -376,7 +394,7 @@
     document.getElementById('pointBiruTampil').textContent = pointTetap.biru;
     document.getElementById('pointKuningTampil').textContent = pointTetap.kuning;
 
-    setRingkasan('rHargaTiket', currentSettings.hargaTiket);
+    setRingkasan('rHargaTiket', formatRibuan(currentSettings.hargaTiket));
     setRingkasan('rKelasLomba', currentSettings.kelasLomba);
     setRingkasan('rJenisBurung', currentSettings.jenisBurung);
     setRingkasan('rPointMerah', currentSettings.pointMerah, 'menunggu');
@@ -396,6 +414,15 @@
       el.classList.remove('kosong');
     }
   }
+
+  hargaTiketInput.addEventListener('input', () => {
+    const posisiAsli = hargaTiketInput.selectionStart;
+    const panjangSebelum = hargaTiketInput.value.length;
+    hargaTiketInput.value = formatRibuan(hargaTiketInput.value);
+    const selisih = hargaTiketInput.value.length - panjangSebelum;
+    const posisiBaru = Math.max(0, posisiAsli + selisih);
+    hargaTiketInput.setSelectionRange(posisiBaru, posisiBaru);
+  });
 
   document.getElementById('btnSimpanSettings').addEventListener('click', () => {
     socket.emit('update-settings', {
