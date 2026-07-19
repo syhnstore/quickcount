@@ -27,6 +27,7 @@
     color: var(--ink);
     padding-bottom: 60px;
   }
+  body.no-scroll{ overflow:hidden; height:100%; }
   header{
     background: var(--teal-deep);
     color: var(--cream);
@@ -255,7 +256,7 @@
 
 <header>
   <div>
-    <h1>Form - Quick Count</h1>
+    <h1>Penilaian Lomba Lovebird</h1>
     <p><span class="dot" id="statusDot"></span> <span id="statusText">Menghubungkan...</span></p>
   </div>
   <div class="juri-info hidden" id="juriInfo">
@@ -300,7 +301,7 @@
       </div>
 
       <div class="field">
-        <label>Tag / Putaran</label>
+        <label>Desain Box</label>
         <div class="grid-box" id="gridDesainBox">
           <button type="button" class="btn-huruf" data-huruf="A">A</button>
           <button type="button" class="btn-huruf" data-huruf="B">B</button>
@@ -340,12 +341,12 @@
       <table>
         <thead>
           <tr>
-            <th>No.</th>
-            <th>Tag</th>
+            <th>Gantangan</th>
+            <th>Box</th>
             <th>Juri</th>
-            <th>Merah</th>
-            <th>Biru</th>
-            <th>Kuning</th>
+            <th>Stick M</th>
+            <th>Stick B</th>
+            <th>Stick K</th>
             <th>Waktu</th>
           </tr>
         </thead>
@@ -721,6 +722,20 @@
   socket.on('semua-direset', () => {
     tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
   });
+
+  // ============ KUNCI SCROLL HALAMAN UTAMA SAAT OVERLAY TAMPIL ============
+  (function(){
+    const semuaOverlay = document.querySelectorAll('.overlay');
+    function perbaruiKunciScroll(){
+      let adaYangTampil = false;
+      semuaOverlay.forEach(el => { if(!el.classList.contains('hidden')) adaYangTampil = true; });
+      document.body.classList.toggle('no-scroll', adaYangTampil);
+    }
+    semuaOverlay.forEach(el => {
+      new MutationObserver(perbaruiKunciScroll).observe(el, { attributes:true, attributeFilter:['class'] });
+    });
+    perbaruiKunciScroll();
+  })();
 </script>
 
 </body>
