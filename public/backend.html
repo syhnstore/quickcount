@@ -158,8 +158,6 @@
   /* SPREADSHEET STYLE */
   .sheet-container{
     background:#fff;
-    border: 1px solid var(--line);
-    border-radius: 6px;
     overflow-x:auto;
   }
   table.sheet{
@@ -246,7 +244,7 @@
 <body>
 
 <div class="topbar">
-  <h1>Backend - Rekap Penilaian Lomba Lovebird</h1>
+  <h1>Backend - Quick Count</h1>
   <div class="status" id="statusText">Menghubungkan...</div>
   <div class="actions">
     <button class="btn-print" id="btnPrint">Cetak (A4)</button>
@@ -261,11 +259,11 @@
     <div class="settings-grid">
       <div class="settings-field">
         <label for="hargaTiket">Harga Tiket</label>
-        <input type="text" id="hargaTiket" placeholder="Contoh: Rp 150.000">
+        <input type="text" id="hargaTiket" placeholder="Contoh: Rp 10.000">
       </div>
       <div class="settings-field">
         <label for="kelasLomba">Kelas Lomba</label>
-        <input type="text" id="kelasLomba" placeholder="Contoh: Kelas A Dewasa">
+        <input type="text" id="kelasLomba" placeholder="Contoh: TPS 2XP ...">
       </div>
       <div class="settings-field">
         <label for="jenisBurung">Jenis Burung</label>
@@ -278,21 +276,21 @@
         </select>
       </div>
       <div class="settings-field">
-        <label for="pointMerah">Point Merah (Kocokan 1)</label>
+        <label for="pointMerah">Point Merah</label>
         <input type="number" id="pointMerah" placeholder="Isi setelah kocok manual">
-        <div class="hint">Kosongkan sampai pengocokan selesai</div>
+        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
       </div>
       <div class="settings-field">
-        <label for="pointRestart">Point Restart (Kocokan 2)</label>
+        <label for="pointRestart">Point Restart</label>
         <input type="number" id="pointRestart" placeholder="Isi setelah kocok manual">
-        <div class="hint">Kosongkan sampai pengocokan selesai</div>
+        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
       </div>
       <div class="settings-field">
-        <label>Point Biru (Tetap)</label>
+        <label>Point Biru</label>
         <div class="tetap" id="pointBiruTampil">40</div>
       </div>
       <div class="settings-field">
-        <label>Point Kuning (Tetap)</label>
+        <label>Point Kuning</label>
         <div class="tetap" id="pointKuningTampil">10</div>
       </div>
     </div>
@@ -301,8 +299,8 @@
   </div>
 
   <div class="ringkasan-wrap">
-    <h2 class="print-only" style="display:block;">Rekap Penilaian Lomba Lovebird</h2>
-    <h2>Ringkasan Kelas Lomba</h2>
+    <h2 class="print-only" style="display:block; font-size:1.3rem; margin:0 0 2px;">KW8 ARENA - REKAP DIGITAL LOVEBIRD</h2>
+    <span style="display:block; font-size:0.65rem; text-align: center; margin-bottom: 12px;">© 2026 QUICK COUNT. All rights reserved.</span>
     <table class="ringkasan">
       <thead>
         <tr>
@@ -329,28 +327,30 @@
     </table>
   </div>
 
-  <div class="sheet-container">
-    <table class="sheet">
-      <thead>
-        <tr>
-          <th>Gantangan</th>
-          <th>Tag</th>
-          <th>Nama Juri</th>
-          <th>Stick Merah</th>
-          <th>Stick Biru</th>
-          <th>Stick Kuning</th>
-          <th>Skor Merah</th>
-          <th>Skor Biru</th>
-          <th>Skor Kuning</th>
-          <th>Total Skor</th>
-          <th>Hasil Restart</th>
-          <th class="kolom-aksi">Aksi</th>
-        </tr>
-      </thead>
-      <tbody id="tabelBody">
-        <tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>
-      </tbody>
-    </table>
+  <div class="ringkasan-wrap">
+    <div class="sheet-container">
+      <table class="sheet">
+        <thead>
+          <tr>
+            <th>Gantangan</th>
+            <th>Tag</th>
+            <th>Nama Juri</th>
+            <th>Stick Merah</th>
+            <th>Stick Biru</th>
+            <th>Stick Kuning</th>
+            <th>Point Merah</th>
+            <th>Point Biru</th>
+            <th>Point Kuning</th>
+            <th>Total Point</th>
+            <th>Hasil Restart</th>
+            <th class="kolom-aksi">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tabelBody">
+          <tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -497,7 +497,7 @@
         <td class="col-num">${skorBiru}</td>
         <td class="col-num">${skorKuning}</td>
         <td class="col-num cell-total">${total === null ? '<span class="dash">-</span>' : total}</td>
-        <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">Seimbang</span>' : ''}</td>
+        <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">WINNER</span>' : ''}</td>
         <td class="kolom-aksi"><button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button></td>
       `;
       tabelBody.appendChild(tr);
