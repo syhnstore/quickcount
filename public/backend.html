@@ -184,6 +184,7 @@
   table.sheet tbody tr:nth-child(even){ background:#FAFBFC; }
   table.sheet tbody tr:hover{ background:#EEF6FF; }
   table.sheet tbody tr.baris-seimbang{ background:#FDF3D6 !important; }
+  table.sheet tbody tr.baris-ditandai{ background:#FFFB45 !important; }
   td.col-juri{ text-align:left; font-weight:600; }
   td.col-num{ font-variant-numeric: tabular-nums; }
   td.dash{ color:#AAA; }
@@ -201,10 +202,43 @@
     padding:1px 5px;
     border-radius:8px;
   }
-  .btn-hapus-baris{
-    border:none; background:transparent; color:#C0392B; cursor:pointer; font-size:0.9rem;
+  .kolom-aksi{ white-space:nowrap; }
+  .btn-hapus-baris, .btn-edit-baris{
+    border:none; background:transparent; cursor:pointer; font-size:0.9rem; padding:2px 5px;
   }
+  .btn-hapus-baris{ color:#C0392B; }
+  .btn-edit-baris{ color: var(--teal-mid); }
   .empty-row td{ padding: 26px 8px; color:#999; font-style: italic; white-space:normal; }
+
+  /* ============ MODAL EDIT DATA ============ */
+  .overlay-edit{
+    position: fixed; inset:0; background: rgba(20,24,22,0.55);
+    display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;
+  }
+  .overlay-edit.hidden{ display:none; }
+  .edit-box{
+    background:#fff; border-radius:12px; padding:20px 22px; width:100%; max-width:420px;
+    max-height:88vh; overflow-y:auto;
+  }
+  .edit-box h3{ margin:0 0 14px; color: var(--teal-deep); }
+  .edit-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px; }
+  .edit-field{ display:flex; flex-direction:column; gap:5px; }
+  .edit-field label{ font-size:0.75rem; font-weight:600; color:#555; }
+  .edit-field input, .edit-field select{
+    padding: 8px 9px; border-radius:7px; border:1px solid var(--line); font-size:0.92rem;
+  }
+  .edit-tandai{
+    display:flex; align-items:center; gap:8px; font-size:0.85rem; font-weight:600;
+    background:#FFFDE0; border:1px solid #F0E68C; border-radius:8px; padding:10px 12px; margin-bottom:12px;
+  }
+  .edit-tandai input{ width:16px; height:16px; }
+  .edit-error{ color:var(--merah); font-size:0.82rem; margin:0 0 10px; display:none; }
+  .edit-actions{ display:flex; gap:10px; }
+  .edit-actions button{
+    flex:1; padding:11px; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.9rem;
+  }
+  .btn-batal-edit{ background:#F1EEE4; color: var(--ink); }
+  .btn-simpan-edit{ background: var(--teal-deep); color:#fff; }
 
   .print-only{ display:none; }
   h2.print-only{ text-align:center; }
@@ -226,8 +260,8 @@
   /* ============ CETAK A4 ============ */
   @media print{
     @page{ size: A4; margin: 0.5cm; }
-    body{ background:#fff; }
-    .topbar, .actions, .settings-card, .btn-hapus-baris{ display:none !important; }
+    body{ background:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+    .topbar, .actions, .settings-card, .btn-hapus-baris, .btn-edit-baris, .overlay-edit{ display:none !important; }
     .print-only{ display:block; }
     .wrap{ max-width:none; margin:0; padding:0; }
     .ringkasan-wrap{ border:none; padding:0 0 14px; margin-bottom:14px; overflow:visible; }
@@ -236,6 +270,7 @@
     .sheet-container{ border:none; overflow:visible; }
     table.sheet{ font-size: 14px !important; min-width:0; }
     table.sheet th, table.sheet td{ padding:7px 8px; }
+    table.sheet tbody tr.baris-ditandai{ background:#FFFB45 !important; }
     th.kolom-aksi, td.kolom-aksi{ display:none !important; }
     table.sheet thead th{ position:static; }
   }
@@ -350,6 +385,53 @@
           <tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="overlay-edit hidden" id="overlayEdit">
+  <div class="edit-box">
+    <h3>Edit Data Penilaian</h3>
+    <div class="edit-grid">
+      <div class="edit-field">
+        <label>No. Gantangan</label>
+        <input type="number" id="editGantangan" min="1" max="60">
+      </div>
+      <div class="edit-field">
+        <label>Desain Box</label>
+        <select id="editDesainBox">
+          <option value="A">A</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+        </select>
+      </div>
+      <div class="edit-field">
+        <label>Nama Juri</label>
+        <input type="text" id="editJuri">
+      </div>
+      <div class="edit-field"></div>
+      <div class="edit-field">
+        <label>Stick Merah</label>
+        <input type="number" id="editStickMerah" min="0">
+      </div>
+      <div class="edit-field">
+        <label>Stick Biru</label>
+        <input type="number" id="editStickBiru" min="0">
+      </div>
+      <div class="edit-field">
+        <label>Stick Kuning</label>
+        <input type="number" id="editStickKuning" min="0">
+      </div>
+    </div>
+    <label class="edit-tandai">
+      <input type="checkbox" id="editTandai">
+      Tandai baris ini (highlight kuning di layar &amp; saat dicetak)
+    </label>
+    <p class="edit-error" id="editError"></p>
+    <div class="edit-actions">
+      <button class="btn-batal-edit" id="btnBatalEdit">Batal</button>
+      <button class="btn-simpan-edit" id="btnSimpanEdit">Simpan Perubahan</button>
     </div>
   </div>
 </div>
@@ -486,6 +568,7 @@
       const tr = document.createElement('tr');
       tr.dataset.id = entry.id;
       if(seimbang) tr.classList.add('baris-seimbang');
+      if(entry.ditandai) tr.classList.add('baris-ditandai');
       tr.innerHTML = `
         <td class="col-num">${entry.gantangan}</td>
         <td>${entry.desainBox}</td>
@@ -498,7 +581,10 @@
         <td class="col-num">${skorKuning}</td>
         <td class="col-num cell-total">${total === null ? '<span class="dash">-</span>' : total}</td>
         <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">WINNER</span>' : ''}</td>
-        <td class="kolom-aksi"><button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button></td>
+        <td class="kolom-aksi">
+          <button class="btn-edit-baris" data-id="${entry.id}" title="Edit / tandai baris ini">&#9998;</button>
+          <button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button>
+        </td>
       `;
       tabelBody.appendChild(tr);
     });
@@ -508,6 +594,13 @@
         if(confirm('Hapus data baris ini?')){
           socket.emit('hapus-penilaian', parseInt(btn.dataset.id));
         }
+      });
+    });
+
+    tabelBody.querySelectorAll('.btn-edit-baris').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const entry = dataPenilaian.find(p => p.id === parseInt(btn.dataset.id));
+        if(entry) bukaEdit(entry);
       });
     });
   }
@@ -533,6 +626,61 @@
   socket.on('semua-direset', () => {
     dataPenilaian = [];
     renderTabel();
+  });
+
+  // ============ MODAL EDIT DATA / TANDAI BARIS ============
+  const overlayEdit = document.getElementById('overlayEdit');
+  const editError = document.getElementById('editError');
+  let editingId = null;
+
+  function bukaEdit(entry){
+    editingId = entry.id;
+    document.getElementById('editGantangan').value = entry.gantangan;
+    document.getElementById('editDesainBox').value = entry.desainBox;
+    document.getElementById('editJuri').value = entry.juri;
+    document.getElementById('editStickMerah').value = entry.stickMerah;
+    document.getElementById('editStickBiru').value = entry.stickBiru;
+    document.getElementById('editStickKuning').value = entry.stickKuning;
+    document.getElementById('editTandai').checked = !!entry.ditandai;
+    editError.style.display = 'none';
+    overlayEdit.classList.remove('hidden');
+  }
+
+  function tutupEdit(){
+    overlayEdit.classList.add('hidden');
+    editingId = null;
+  }
+
+  document.getElementById('btnBatalEdit').addEventListener('click', tutupEdit);
+
+  document.getElementById('btnSimpanEdit').addEventListener('click', () => {
+    if(editingId === null) return;
+    socket.emit('edit-penilaian', {
+      id: editingId,
+      gantangan: document.getElementById('editGantangan').value,
+      desainBox: document.getElementById('editDesainBox').value,
+      juri: document.getElementById('editJuri').value,
+      stickMerah: document.getElementById('editStickMerah').value,
+      stickBiru: document.getElementById('editStickBiru').value,
+      stickKuning: document.getElementById('editStickKuning').value,
+      ditandai: document.getElementById('editTandai').checked
+    });
+  });
+
+  socket.on('penilaian-diedit', (entry) => {
+    const idx = dataPenilaian.findIndex(p => p.id === entry.id);
+    if(idx !== -1) dataPenilaian[idx] = entry;
+    renderTabel();
+    tutupEdit();
+  });
+
+  socket.on('error-penilaian', (msg) => {
+    if(!overlayEdit.classList.contains('hidden')){
+      editError.textContent = msg;
+      editError.style.display = 'block';
+    } else {
+      alert(msg);
+    }
   });
 </script>
 
