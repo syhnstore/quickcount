@@ -577,13 +577,10 @@
     const total = merahSiap ? (skorMerah + skorBiru + skorKuning) : null;
 
     const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined && currentSettings.pointRestart > 0;
-    // Total skor dikurangi berulang kali dengan point restart (modulo) sampai tidak bisa dikurangi lagi
-    let hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
-    // Jika hasilnya sama persis dengan total (artinya total belum pernah berhasil dikurangi
-    // sama sekali oleh point restart), maka dianggap pas/seimbang -> 0, dan ini juaranya.
-    if(hasilRestart !== null && hasilRestart === total){
-      hasilRestart = 0;
-    }
+    // Total skor dikurangi berulang kali dengan point restart (modulo) sampai tidak bisa dikurangi lagi.
+    // Kalau total lebih kecil dari point restart, tidak bisa dikurangi sama sekali -> hasilnya ya total itu sendiri.
+    // Kalau total kelipatan pas dari point restart -> sisanya 0 (ini kandidat WINNER).
+    const hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
 
     return { skorMerah, skorBiru, skorKuning, total, hasilRestart };
   }
