@@ -256,7 +256,7 @@
 
 <header>
   <div>
-    <h1>Penilaian Lomba Lovebird</h1>
+    <h1>Form - Quick Count</h1>
     <p><span class="dot" id="statusDot"></span> <span id="statusText">Menghubungkan...</span></p>
   </div>
   <div class="juri-info hidden" id="juriInfo">
@@ -287,7 +287,7 @@
 </div>
 
 <main class="hidden" id="halamanUtama">
-  <div class="card">
+  <div class="card" style="max-height: 320px; overflow-y: scroll;">
     <h2>Form Penilaian Juri</h2>
     <p class="hint">Isi jumlah stick yang diperoleh peserta di masing-masing warna. Nilai poin dihitung otomatis oleh backend.</p>
     <form id="formPenilaian">
@@ -301,7 +301,7 @@
       </div>
 
       <div class="field">
-        <label>Desain Box</label>
+        <label>Tag / Putaran</label>
         <div class="grid-box" id="gridDesainBox">
           <button type="button" class="btn-huruf" data-huruf="A">A</button>
           <button type="button" class="btn-huruf" data-huruf="B">B</button>
@@ -341,12 +341,12 @@
       <table>
         <thead>
           <tr>
-            <th>Gantangan</th>
-            <th>Box</th>
+            <th>No.</th>
+            <th>Tag</th>
             <th>Juri</th>
-            <th>Stick M</th>
-            <th>Stick B</th>
-            <th>Stick K</th>
+            <th>Merah</th>
+            <th>Biru</th>
+            <th>Kuning</th>
             <th>Waktu</th>
           </tr>
         </thead>
@@ -377,7 +377,7 @@
         <div class="value" id="cfGantangan"></div>
       </div>
       <div class="confirm-box">
-        <div class="label">Kelas</div>
+        <div class="label">Tag</div>
         <div class="value" id="cfBox"></div>
       </div>
     </div>
@@ -390,7 +390,7 @@
     <div class="confirm-stick-row kuning">
       <span>Kuning</span><span class="nilai" id="cfKuning"></span>
     </div>
-    <p class="confirm-note">Catatan: Jika sudah benar silahkan klik tombol <strong>Konfirmasi</strong> untuk mengirim data ke server anda.</p>
+    <p class="confirm-note">Catatan: Jika sudah benar silahkan klik tombol <strong>Konfirmasi</strong> untuk mengirim data ke server.</p>
     <div class="overlay-actions">
       <button class="btn-konfirmasi" id="btnKonfirmasi">Konfirmasi</button>
       <button class="btn-kembali" id="btnKembali">Batal</button>
