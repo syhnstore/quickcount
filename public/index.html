@@ -226,11 +226,6 @@
       </div>
 
       <div class="field">
-        <label for="sesi">Sesi Lomba</label>
-        <input type="text" id="sesi" placeholder="Contoh: Sesi 1" required>
-      </div>
-
-      <div class="field">
         <label for="desainBox">Desain Box</label>
         <select id="desainBox" required>
           <option value="" disabled selected>Pilih desain box</option>
@@ -271,7 +266,6 @@
         <thead>
           <tr>
             <th>Gantangan</th>
-            <th>Sesi</th>
             <th>Box</th>
             <th>Juri</th>
             <th>Stick M</th>
@@ -281,7 +275,7 @@
           </tr>
         </thead>
         <tbody id="tabelBody">
-          <tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>
+          <tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>
         </tbody>
       </table>
     </div>
@@ -294,7 +288,6 @@
     <p class="sub">Periksa kembali data sebelum dikirim.</p>
     <div class="confirm-row"><span>Nama Juri</span><span id="cfJuri"></span></div>
     <div class="confirm-row"><span>No. Gantangan</span><span id="cfGantangan"></span></div>
-    <div class="confirm-row"><span>Sesi Lomba</span><span id="cfSesi"></span></div>
     <div class="confirm-row"><span>Desain Box</span><span id="cfBox"></span></div>
     <div class="confirm-row"><span>Stick Merah</span><span id="cfMerah"></span></div>
     <div class="confirm-row"><span>Stick Biru</span><span id="cfBiru"></span></div>
@@ -455,23 +448,21 @@
     }
 
     const gantangan = gantanganSelect.value;
-    const sesi = document.getElementById('sesi').value.trim();
     const desainBox = document.getElementById('desainBox').value;
     const stickMerah = document.getElementById('stickMerah').value;
     const stickBiru = document.getElementById('stickBiru').value;
     const stickKuning = document.getElementById('stickKuning').value;
 
-    if(!gantangan || !sesi || !desainBox || stickMerah==='' || stickBiru==='' || stickKuning===''){
+    if(!gantangan || !desainBox || stickMerah==='' || stickBiru==='' || stickKuning===''){
       errorMsg.textContent = 'Mohon lengkapi semua data terlebih dahulu.';
       errorMsg.style.display = 'block';
       return;
     }
 
-    pendingData = { gantangan, sesi, desainBox, stickMerah, stickBiru, stickKuning, juri: juriAktif };
+    pendingData = { gantangan, desainBox, stickMerah, stickBiru, stickKuning, juri: juriAktif };
 
     document.getElementById('cfJuri').textContent = juriAktif;
     document.getElementById('cfGantangan').textContent = gantangan;
-    document.getElementById('cfSesi').textContent = sesi;
     document.getElementById('cfBox').textContent = desainBox;
     document.getElementById('cfMerah').textContent = stickMerah;
     document.getElementById('cfBiru').textContent = stickBiru;
@@ -505,7 +496,6 @@
     tr.dataset.id = entry.id;
     tr.innerHTML = `
       <td><span class="badge-box">${entry.gantangan}</span></td>
-      <td>${entry.sesi}</td>
       <td>${entry.desainBox}</td>
       <td>${entry.juri}</td>
       <td class="point-cell">${entry.stickMerah}</td>
@@ -525,7 +515,7 @@
     const data = payload.penilaian || [];
     tabelBody.innerHTML = '';
     if(data.length === 0){
-      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>';
+      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
       return;
     }
     [...data].reverse().forEach(entry => tabelBody.appendChild(buatBaris(entry)));
@@ -547,12 +537,12 @@
     const row = tabelBody.querySelector(`tr[data-id="${id}"]`);
     if(row) row.remove();
     if(tabelBody.children.length === 0){
-      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>';
+      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
     }
   });
 
   socket.on('semua-direset', () => {
-    tabelBody.innerHTML = '<tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>';
+    tabelBody.innerHTML = '<tr class="empty-row"><td colspan="7">Belum ada data masuk</td></tr>';
   });
 </script>
 
