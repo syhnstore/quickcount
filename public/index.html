@@ -15,6 +15,7 @@
     --merah: #D64545;
     --biru: #3568C4;
     --kuning: #E0B027;
+    --hijau-ok: #2F855A;
     --line: #DDD3BE;
     --radius: 14px;
   }
@@ -88,7 +89,8 @@
 
   .error-msg{ color: var(--merah); font-size: 0.85rem; margin-top: 8px; display:none; }
 
-  table{ width:100%; border-collapse: collapse; font-size: 0.9rem; }
+  .table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse: collapse; font-size: 0.9rem; min-width: 560px; }
   thead th{
     text-align:left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em;
     color: var(--teal-mid); padding: 6px 8px; border-bottom: 2px solid var(--line);
@@ -125,18 +127,56 @@
   }
   .btn-kembali{ background: #F1EEE4; color: var(--ink); }
   .btn-konfirmasi{ background: var(--gold); color: var(--teal-deep); }
-  .toast{
-    position:fixed; bottom: 20px; left:50%; transform: translateX(-50%); background: var(--teal-deep);
-    color:#fff; padding: 12px 20px; border-radius: 10px; font-size: 0.9rem; opacity:0;
-    pointer-events:none; transition: opacity 0.25s ease; z-index: 60;
+
+  /* Overlay sukses dengan animasi ceklis */
+  .overlay-sukses-box{
+    background:#fff; border-radius: var(--radius); max-width: 320px; width:100%;
+    padding: 32px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); text-align:center;
   }
-  .toast.show{ opacity:1; }
+  .checkmark-wrap{ display:flex; justify-content:center; margin-bottom: 16px; }
+  .checkmark{ width: 80px; height: 80px; border-radius: 50%; display:block; }
+  .checkmark-circle{
+    stroke: var(--hijau-ok); stroke-width: 3; stroke-miterlimit: 10;
+    fill: none; stroke-dasharray: 166; stroke-dashoffset: 166;
+    animation: circle-draw 0.5s cubic-bezier(0.65,0,0.45,1) forwards;
+  }
+  .checkmark-check{
+    transform-origin: 50% 50%; stroke-dasharray: 48; stroke-dashoffset: 48;
+    stroke: var(--hijau-ok); stroke-width: 4; stroke-linecap:round; stroke-linejoin:round; fill:none;
+    animation: check-draw 0.35s cubic-bezier(0.65,0,0.45,1) 0.5s forwards;
+  }
+  @keyframes circle-draw{ to{ stroke-dashoffset: 0; } }
+  @keyframes check-draw{ to{ stroke-dashoffset: 0; } }
+  .overlay-sukses-box h3{ margin:0 0 6px; color: var(--hijau-ok); font-size:1.15rem; }
+  .overlay-sukses-box p{ margin:0; font-size:0.88rem; color:#7A7264; }
+  .btn-tutup-sukses{
+    margin-top:20px; width:100%; padding:12px; border:none; border-radius:10px;
+    background: var(--teal-deep); color:#fff; font-weight:700; font-size:0.95rem; cursor:pointer;
+  }
 
   #layarLogin{ max-width: 380px; margin: 60px auto; padding: 0 16px; }
   #layarLogin .card{ text-align:left; }
   #layarLogin h2{ text-align:center; }
   .login-error{ color: var(--merah); font-size: 0.85rem; margin-top: 6px; display:none; text-align:center; }
   .hidden{ display:none !important; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 380px){
+    .points-row{ grid-template-columns: 1fr; gap: 12px; }
+    header{ padding: 18px 14px 22px; }
+    header h1{ font-size: 1.2rem; }
+  }
+  @media (min-width: 768px){
+    main{ max-width: 720px; }
+    #layarLogin{ max-width: 420px; }
+    .card{ padding: 26px; }
+    header{ padding: 26px 32px 30px; }
+  }
+  @media (min-width: 1024px){
+    main{ max-width: 800px; }
+    body{ font-size: 1.03rem; }
+    .points-row{ gap: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -226,23 +266,25 @@
 
   <div class="card">
     <h2>Hasil Input Juri (Live)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Gantangan</th>
-          <th>Sesi</th>
-          <th>Box</th>
-          <th>Juri</th>
-          <th>Stick M</th>
-          <th>Stick B</th>
-          <th>Stick K</th>
-          <th>Waktu</th>
-        </tr>
-      </thead>
-      <tbody id="tabelBody">
-        <tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Gantangan</th>
+            <th>Sesi</th>
+            <th>Box</th>
+            <th>Juri</th>
+            <th>Stick M</th>
+            <th>Stick B</th>
+            <th>Stick K</th>
+            <th>Waktu</th>
+          </tr>
+        </thead>
+        <tbody id="tabelBody">
+          <tr class="empty-row"><td colspan="8">Belum ada data masuk</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </main>
 
@@ -264,7 +306,19 @@
   </div>
 </div>
 
-<div class="toast" id="toast">Data terkirim</div>
+<div class="overlay hidden" id="overlaySukses">
+  <div class="overlay-sukses-box">
+    <div class="checkmark-wrap">
+      <svg class="checkmark" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <circle class="checkmark-circle" cx="30" cy="30" r="26"/>
+        <path class="checkmark-check" d="M17 30.5 L26 39 L43 20"/>
+      </svg>
+    </div>
+    <h3>Data Berhasil Terkirim</h3>
+    <p>Penilaian untuk gantangan <span id="suksesGantangan"></span> sudah tersimpan.</p>
+    <button class="btn-tutup-sukses" id="btnTutupSukses">Tutup</button>
+  </div>
+</div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -365,17 +419,31 @@
 
   const form = document.getElementById('formPenilaian');
   const overlay = document.getElementById('overlay');
+  const overlaySukses = document.getElementById('overlaySukses');
   const errorMsg = document.getElementById('errorMsg');
-  const toast = document.getElementById('toast');
   const tabelBody = document.getElementById('tabelBody');
 
   let pendingData = null;
+  let timeoutTutupSukses = null;
 
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(()=> toast.classList.remove('show'), 2200);
+  function tampilkanSukses(gantangan){
+    document.getElementById('suksesGantangan').textContent = gantangan;
+    overlaySukses.classList.remove('hidden');
+    // Re-trigger animasi ceklis setiap kali muncul
+    const svg = overlaySukses.querySelector('svg');
+    const clone = svg.cloneNode(true);
+    svg.parentNode.replaceChild(clone, svg);
+
+    clearTimeout(timeoutTutupSukses);
+    timeoutTutupSukses = setTimeout(() => {
+      overlaySukses.classList.add('hidden');
+    }, 2200);
   }
+
+  document.getElementById('btnTutupSukses').addEventListener('click', () => {
+    clearTimeout(timeoutTutupSukses);
+    overlaySukses.classList.add('hidden');
+  });
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -469,8 +537,9 @@
 
     if(pendingData && String(entry.gantangan) === String(pendingData.gantangan) && entry.juri === juriAktif){
       form.reset();
+      const gantanganTerkirim = pendingData.gantangan;
       pendingData = null;
-      showToast('Data berhasil dikirim');
+      tampilkanSukses(gantanganTerkirim);
     }
   });
 
