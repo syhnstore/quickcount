@@ -48,9 +48,9 @@
   .btn-reset{ background:#F1EEE4; color: var(--merah); }
 
   .wrap{
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 0 16px 60px;
+    max-width: 100%;
+    margin: 20px;
+    padding: 0;
   }
 
   .settings-card{
@@ -181,9 +181,10 @@
     top:0;
     z-index:2;
   }
-  table.sheet tbody tr:nth-child(even){ background:#FAFBFC; }
+  table.sheet tbody tr { background:#FFF; }
+  table.sheet tbody tr:nth-child(even){ background:#FFF; }
   table.sheet tbody tr:hover{ background:#EEF6FF; }
-  table.sheet tbody tr.baris-seimbang{ background:#FDF3D6 !important; }
+  table.sheet tbody tr.baris-seimbang{ background:#FFFB45 !important; }
   table.sheet tbody tr.baris-ditandai{ background:#FFFB45 !important; }
   td.col-juri{ text-align:left; font-weight:600; }
   td.col-num{ font-variant-numeric: tabular-nums; }
@@ -191,7 +192,7 @@
   .cell-merah{ color: var(--merah); font-weight:700; }
   .cell-biru{ color: var(--biru); font-weight:700; }
   .cell-kuning{ color:#B8860B; font-weight:700; }
-  .cell-total{ font-weight:800; background:#FDF6E3 !important; }
+  .cell-total{ font-weight:800; }
   .cell-restart{ font-weight:800; }
   .label-juara{
     display:inline-block;
@@ -212,12 +213,12 @@
 
   /* ============ MODAL EDIT DATA ============ */
   .overlay-edit{
-    position: fixed; inset:0; background: rgba(20,24,22,0.55);
+    position: fixed; inset:0; background: rgb(20 24 22 / 80%); backdrop-filter: blur(5px);
     display:flex; align-items:center; justify-content:center; padding:16px; z-index:50;
   }
   .overlay-edit.hidden{ display:none; }
   .edit-box{
-    background:#fff; border-radius:12px; padding:20px 22px; width:100%; max-width:420px;
+    background:#fff; border-radius:12px; padding:20px 22px; width:100%; max-width:max-content;
     max-height:88vh; overflow-y:auto;
   }
   .edit-box h3{ margin:0 0 14px; color: var(--teal-deep); }
@@ -248,19 +249,19 @@
     .topbar{ padding: 12px 14px; }
     .topbar h1{ font-size: 1rem; }
     .actions button{ padding: 7px 10px; font-size: 0.78rem; }
-    .wrap{ padding: 0 10px 40px; margin-top: 14px; }
+    .wrap{ padding: 0 0 40px; margin: 14px; }
     .settings-card, .ringkasan-wrap{ padding: 14px; }
     .settings-grid{ grid-template-columns: 1fr 1fr; }
   }
   @media (min-width: 1024px){
-    .wrap{ padding: 0 24px 60px; }
+    .wrap{ padding: 0 0px 20px; }
     table.sheet{ font-size: 0.88rem; }
   }
 
   /* ============ CETAK A4 ============ */
   @media print{
     @page{ size: A4; margin: 0.5cm; }
-    body{ background:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+    body{ background:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
     .topbar, .actions, .settings-card, .btn-hapus-baris, .btn-edit-baris, .overlay-edit{ display:none !important; }
     .print-only{ display:block; }
     .wrap{ max-width:none; margin:0; padding:0; }
@@ -398,7 +399,7 @@
         <input type="number" id="editGantangan" min="1" max="60">
       </div>
       <div class="edit-field">
-        <label>Desain Box</label>
+        <label>Tag / Putaran</label>
         <select id="editDesainBox">
           <option value="A">A</option>
           <option value="B">B</option>
