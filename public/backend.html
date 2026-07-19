@@ -23,6 +23,7 @@
     background:#E9EAED;
     color: var(--ink);
   }
+  body.no-scroll{ overflow:hidden; height:100%; }
   .topbar{
     background: var(--teal-deep);
     color:#fff;
@@ -101,6 +102,24 @@
     font-size:0.72rem;
     color:#999;
     margin-top:4px;
+  }
+  .cari-field .cari-row{ display:flex; gap:6px; }
+  .cari-field input{ flex:1; min-width:0; }
+  .btn-cari-gantangan{
+    flex-shrink:0; background: var(--teal-deep); color:#fff; border:none;
+    padding: 0 14px; border-radius: 7px; font-weight:700; cursor:pointer; font-size:0.95rem;
+  }
+  .btn-cari-gantangan:active{ background: var(--teal-mid); }
+  .cari-status{
+    display:none; align-items:center; gap:10px; flex-wrap:wrap;
+    background:#FFF8E1; border:1px solid #F0DBA0; border-radius:8px;
+    padding:8px 12px; margin-top:12px; font-size:0.85rem; color:#6B5A1E;
+  }
+  .cari-status.show{ display:flex; }
+  .cari-status strong{ color: var(--teal-deep); }
+  .btn-tampilkan-semua{
+    background:#fff; border:1px solid var(--teal-mid); color: var(--teal-mid);
+    padding:5px 12px; border-radius:16px; font-size:0.78rem; font-weight:700; cursor:pointer;
   }
   .btn-simpan{
     margin-top: 14px;
@@ -329,6 +348,17 @@
         <label>Point Kuning</label>
         <div class="tetap" id="pointKuningTampil">10</div>
       </div>
+      <div class="settings-field cari-field">
+        <label for="cariGantangan">Cari No. Gantangan</label>
+        <div class="cari-row">
+          <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
+          <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
+        </div>
+      </div>
+    </div>
+    <div class="cari-status" id="cariStatus">
+      <span id="cariStatusText"></span>
+      <button type="button" class="btn-tampilkan-semua" id="btnTampilkanSemua">Tampilkan Semua</button>
     </div>
     <button class="btn-simpan" id="btnSimpanSettings">Simpan Pengaturan</button>
     <span class="saved-msg" id="savedMsg">Tersimpan</span>
@@ -370,7 +400,7 @@
           <tr>
             <th>Gantangan</th>
             <th>Tag</th>
-            <th>Nama Juri</th>
+            <th>Juri</th>
             <th>Stick Merah</th>
             <th>Stick Biru</th>
             <th>Stick Kuning</th>
@@ -447,6 +477,7 @@
   let currentSettings = { hargaTiket:'', kelasLomba:'', jenisBurung:'', pointMerah:null, pointRestart:null };
   let pointTetap = { biru:40, kuning:10 };
   let dataPenilaian = [];
+  let filterGantangan = null;
 
   const hargaTiketInput = document.getElementById('hargaTiket');
   const kelasLombaInput = document.getElementById('kelasLomba');
@@ -559,11 +590,19 @@
 
   function renderTabel(){
     tabelBody.innerHTML = '';
+    const sumberData = filterGantangan !== null
+      ? dataPenilaian.filter(p => p.gantangan === filterGantangan)
+      : dataPenilaian;
+
     if(dataPenilaian.length === 0){
       tabelBody.innerHTML = '<tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>';
       return;
     }
-    dataPenilaian.forEach((entry) => {
+    if(sumberData.length === 0){
+      tabelBody.innerHTML = `<tr class="empty-row"><td colspan="12">Data untuk No. Gantangan ${filterGantangan} tidak ditemukan.</td></tr>`;
+      return;
+    }
+    sumberData.forEach((entry) => {
       const { skorMerah, skorBiru, skorKuning, total, hasilRestart } = hitungSkor(entry);
       const seimbang = hasilRestart === 0;
       const tr = document.createElement('tr');
@@ -606,6 +645,43 @@
     });
   }
 
+  // ============ PENCARIAN NO. GANTANGAN ============
+  const cariGantanganInput = document.getElementById('cariGantangan');
+  const cariStatus = document.getElementById('cariStatus');
+  const cariStatusText = document.getElementById('cariStatusText');
+
+  function jalankanPencarian(){
+    const val = cariGantanganInput.value;
+    const num = parseInt(val);
+    if(val === '' || isNaN(num)){
+      cariGantanganInput.focus();
+      return;
+    }
+    filterGantangan = num;
+    const ditemukan = dataPenilaian.filter(p => p.gantangan === num).length;
+    cariStatusText.innerHTML = ditemukan > 0
+      ? `Menampilkan hasil untuk No. Gantangan <strong>${num}</strong> (${ditemukan} data).`
+      : `Tidak ada data untuk No. Gantangan <strong>${num}</strong>.`;
+    cariStatus.classList.add('show');
+    renderTabel();
+  }
+
+  function tampilkanSemuaData(){
+    filterGantangan = null;
+    cariGantanganInput.value = '';
+    cariStatus.classList.remove('show');
+    renderTabel();
+  }
+
+  document.getElementById('btnCariGantangan').addEventListener('click', jalankanPencarian);
+  cariGantanganInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      jalankanPencarian();
+    }
+  });
+  document.getElementById('btnTampilkanSemua').addEventListener('click', tampilkanSemuaData);
+
   socket.on('init-data', (payload) => {
     dataPenilaian = payload.penilaian || [];
     currentSettings = payload.settings || currentSettings;
@@ -626,7 +702,7 @@
 
   socket.on('semua-direset', () => {
     dataPenilaian = [];
-    renderTabel();
+    tampilkanSemuaData();
   });
 
   // ============ MODAL EDIT DATA / TANDAI BARIS ============
@@ -683,6 +759,20 @@
       alert(msg);
     }
   });
+
+  // ============ KUNCI SCROLL HALAMAN UTAMA SAAT OVERLAY TAMPIL ============
+  (function(){
+    const semuaOverlay = document.querySelectorAll('.overlay, .overlay-edit');
+    function perbaruiKunciScroll(){
+      let adaYangTampil = false;
+      semuaOverlay.forEach(el => { if(!el.classList.contains('hidden')) adaYangTampil = true; });
+      document.body.classList.toggle('no-scroll', adaYangTampil);
+    }
+    semuaOverlay.forEach(el => {
+      new MutationObserver(perbaruiKunciScroll).observe(el, { attributes:true, attributeFilter:['class'] });
+    });
+    perbaruiKunciScroll();
+  })();
 </script>
 
 </body>
