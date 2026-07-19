@@ -26,14 +26,15 @@ let nextId = 1;
 // Pengaturan kelas lomba, diatur oleh admin dari halaman backend
 let settings = {
   hargaTiket: '',
+  kelasLomba: '',
   jenisBurung: '',
-  pointMerah: null // diisi manual oleh admin SETELAH pengocokan fisik selesai
+  pointMerah: null,   // diisi manual admin SETELAH pengocokan fisik ke-1 selesai
+  pointRestart: null  // diisi manual admin SETELAH pengocokan fisik ke-2 (restart) selesai
 };
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Endpoint login sederhana untuk juri
 app.post('/api/login', (req, res) => {
   const { nama, password } = req.body || {};
   if (password === PASSWORD_JURI && DAFTAR_JURI.includes(nama)) {
@@ -43,7 +44,6 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// Endpoint untuk ambil daftar nama juri (dipakai dropdown login)
 app.get('/api/daftar-juri', (req, res) => {
   res.json(DAFTAR_JURI);
 });
@@ -106,10 +106,15 @@ io.on('connection', (socket) => {
 
   socket.on('update-settings', (data) => {
     if (data.hargaTiket !== undefined) settings.hargaTiket = data.hargaTiket;
+    if (data.kelasLomba !== undefined) settings.kelasLomba = data.kelasLomba;
     if (data.jenisBurung !== undefined) settings.jenisBurung = data.jenisBurung;
     if (data.pointMerah !== undefined) {
       const pm = data.pointMerah === '' ? null : parseFloat(data.pointMerah);
       settings.pointMerah = pm === null || isNaN(pm) ? null : pm;
+    }
+    if (data.pointRestart !== undefined) {
+      const pr = data.pointRestart === '' ? null : parseFloat(data.pointRestart);
+      settings.pointRestart = pr === null || isNaN(pr) ? null : pr;
     }
     io.emit('settings-updated', settings);
   });
