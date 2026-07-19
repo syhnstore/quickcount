@@ -35,7 +35,7 @@
   }
   .topbar h1{ margin:0; font-size:1.15rem; }
   .topbar .status{ font-size:0.8rem; color:#F3D9A6; }
-  .actions{ display:flex; gap:8px; }
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; }
   .actions button{
     padding: 8px 14px;
     border-radius: 8px;
@@ -48,7 +48,7 @@
   .btn-reset{ background:#F1EEE4; color: var(--merah); }
 
   .wrap{
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 20px auto;
     padding: 0 16px 60px;
   }
@@ -67,7 +67,7 @@
   }
   .settings-grid{
     display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: 14px;
   }
   .settings-field label{
@@ -120,6 +120,38 @@
   }
   .saved-msg.show{ opacity:1; }
 
+  /* Ringkasan pengaturan (tampil di layar + jadi tabel saat dicetak) */
+  .ringkasan-wrap{
+    background:#fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    overflow-x:auto;
+  }
+  .ringkasan-wrap h2{
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    color: var(--teal-deep);
+  }
+  table.ringkasan{
+    border-collapse: collapse;
+    width:100%;
+    font-size: 0.85rem;
+    min-width: 560px;
+  }
+  table.ringkasan th, table.ringkasan td{
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    text-align:center;
+  }
+  table.ringkasan thead th{
+    background: var(--sheet-header);
+    font-weight:700;
+    color:#333;
+  }
+  table.ringkasan td.kosong{ color:#AAA; font-style:italic; }
+
   /* SPREADSHEET STYLE */
   .sheet-container{
     background:#fff;
@@ -132,6 +164,7 @@
     width:100%;
     font-size: 0.82rem;
     font-family: "Segoe UI", Arial, sans-serif;
+    min-width: 900px;
   }
   table.sheet th, table.sheet td{
     border: 1px solid var(--line);
@@ -149,6 +182,7 @@
   }
   table.sheet tbody tr:nth-child(even){ background:#FAFBFC; }
   table.sheet tbody tr:hover{ background:#EEF6FF; }
+  table.sheet tbody tr.baris-seimbang{ background:#FDF3D6 !important; }
   td.col-juri{ text-align:left; font-weight:600; }
   td.col-num{ font-variant-numeric: tabular-nums; }
   td.dash{ color:#AAA; }
@@ -156,28 +190,52 @@
   .cell-biru{ color: var(--biru); font-weight:700; }
   .cell-kuning{ color:#B8860B; font-weight:700; }
   .cell-total{ font-weight:800; background:#FDF6E3 !important; }
+  .cell-restart{ font-weight:800; }
+  .label-juara{
+    display:inline-block;
+    margin-left:4px;
+    font-size:0.7rem;
+    background: var(--gold);
+    color: var(--teal-deep);
+    padding:1px 5px;
+    border-radius:8px;
+  }
   .btn-hapus-baris{
     border:none; background:transparent; color:#C0392B; cursor:pointer; font-size:0.9rem;
   }
-  .empty-row td{ padding: 26px 8px; color:#999; font-style: italic; }
+  .empty-row td{ padding: 26px 8px; color:#999; font-style: italic; white-space:normal; }
 
   .print-only{ display:none; }
 
+  /* ============ RESPONSIVE (layar) ============ */
+  @media (max-width: 640px){
+    .topbar{ padding: 12px 14px; }
+    .topbar h1{ font-size: 1rem; }
+    .actions button{ padding: 7px 10px; font-size: 0.78rem; }
+    .wrap{ padding: 0 10px 40px; margin-top: 14px; }
+    .settings-card, .ringkasan-wrap{ padding: 14px; }
+    .settings-grid{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (min-width: 1024px){
+    .wrap{ padding: 0 24px 60px; }
+    table.sheet{ font-size: 0.88rem; }
+  }
+
   /* ============ CETAK A4 ============ */
   @media print{
-    @page{ size: A4; margin: 12mm; }
+    @page{ size: A4; margin: 10mm; }
     body{ background:#fff; }
-    .topbar, .actions, .btn-simpan, .settings-field input, .btn-hapus-baris{ display:none !important; }
+    .topbar, .actions, .settings-card, .btn-hapus-baris{ display:none !important; }
     .print-only{ display:block; }
     .wrap{ max-width:none; margin:0; padding:0; }
-    .settings-card{ border:none; padding:0 0 10px; margin-bottom:10px; }
-    .settings-grid{ display:flex; flex-wrap:wrap; gap: 18px; }
-    .settings-field .tetap{ border:none; background:none; padding:0; }
-    .settings-field label{ color:#000; }
-    table.sheet{ font-size: 10px; }
-    table.sheet th, table.sheet td{ padding:4px 5px; }
-    th:last-child, td:last-child{ display:none; } /* kolom aksi */
+    .ringkasan-wrap{ border:none; padding:0 0 10px; margin-bottom:10px; overflow:visible; }
+    table.ringkasan{ font-size:12px; min-width:0; }
+    table.ringkasan th, table.ringkasan td{ padding:6px 7px; }
     .sheet-container{ border:none; overflow:visible; }
+    table.sheet{ font-size: 12px !important; min-width:0; }
+    table.sheet th, table.sheet td{ padding:6px 7px; }
+    th.kolom-aksi, td.kolom-aksi{ display:none !important; }
+    table.sheet thead th{ position:static; }
   }
 </style>
 </head>
@@ -195,21 +253,29 @@
 <div class="wrap">
 
   <div class="settings-card">
-    <h2 class="print-only" style="display:block;">Rekap Penilaian Lomba Lovebird</h2>
     <h2>Pengaturan Kelas Lomba</h2>
     <div class="settings-grid">
       <div class="settings-field">
-        <label for="hargaTiket">Harga Tiket Kelas Lomba</label>
+        <label for="hargaTiket">Harga Tiket</label>
         <input type="text" id="hargaTiket" placeholder="Contoh: Rp 150.000">
+      </div>
+      <div class="settings-field">
+        <label for="kelasLomba">Kelas Lomba</label>
+        <input type="text" id="kelasLomba" placeholder="Contoh: Kelas A Dewasa">
       </div>
       <div class="settings-field">
         <label for="jenisBurung">Jenis Burung</label>
         <input type="text" id="jenisBurung" placeholder="Contoh: Lovebird Pastel">
       </div>
       <div class="settings-field">
-        <label for="pointMerah">Point Merah (Hasil Kocokan)</label>
+        <label for="pointMerah">Point Merah (Kocokan 1)</label>
         <input type="number" id="pointMerah" placeholder="Isi setelah kocok manual">
-        <div class="hint">Kosongkan sampai pengocokan fisik selesai dilakukan</div>
+        <div class="hint">Kosongkan sampai pengocokan selesai</div>
+      </div>
+      <div class="settings-field">
+        <label for="pointRestart">Point Restart (Kocokan 2)</label>
+        <input type="number" id="pointRestart" placeholder="Isi setelah kocok manual">
+        <div class="hint">Kosongkan sampai pengocokan selesai</div>
       </div>
       <div class="settings-field">
         <label>Point Biru (Tetap)</label>
@@ -224,11 +290,39 @@
     <span class="saved-msg" id="savedMsg">Tersimpan</span>
   </div>
 
+  <div class="ringkasan-wrap">
+    <h2 class="print-only" style="display:block;">Rekap Penilaian Lomba Lovebird</h2>
+    <h2>Ringkasan Kelas Lomba</h2>
+    <table class="ringkasan">
+      <thead>
+        <tr>
+          <th>Harga Tiket</th>
+          <th>Kelas Lomba</th>
+          <th>Jenis Burung</th>
+          <th>Point Merah</th>
+          <th>Point Biru</th>
+          <th>Point Kuning</th>
+          <th>Point Restart</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="rHargaTiket" class="kosong">-</td>
+          <td id="rKelasLomba" class="kosong">-</td>
+          <td id="rJenisBurung" class="kosong">-</td>
+          <td id="rPointMerah" class="kosong">menunggu</td>
+          <td id="rPointBiru">40</td>
+          <td id="rPointKuning">10</td>
+          <td id="rPointRestart" class="kosong">menunggu</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
   <div class="sheet-container">
     <table class="sheet">
       <thead>
         <tr>
-          <th>No</th>
           <th>Gantangan</th>
           <th>Sesi</th>
           <th>Box</th>
@@ -240,8 +334,9 @@
           <th>Skor Biru</th>
           <th>Skor Kuning</th>
           <th>Total Skor</th>
+          <th>Hasil Restart</th>
           <th>Waktu</th>
-          <th>Aksi</th>
+          <th class="kolom-aksi">Aksi</th>
         </tr>
       </thead>
       <tbody id="tabelBody">
@@ -258,29 +353,59 @@
   socket.on('connect', () => statusText.textContent = 'Terhubung - live update aktif');
   socket.on('disconnect', () => statusText.textContent = 'Terputus, mencoba menghubungkan ulang...');
 
-  let currentSettings = { hargaTiket:'', jenisBurung:'', pointMerah:null };
+  let currentSettings = { hargaTiket:'', kelasLomba:'', jenisBurung:'', pointMerah:null, pointRestart:null };
   let pointTetap = { biru:40, kuning:10 };
   let dataPenilaian = [];
 
   const hargaTiketInput = document.getElementById('hargaTiket');
+  const kelasLombaInput = document.getElementById('kelasLomba');
   const jenisBurungInput = document.getElementById('jenisBurung');
   const pointMerahInput = document.getElementById('pointMerah');
+  const pointRestartInput = document.getElementById('pointRestart');
   const tabelBody = document.getElementById('tabelBody');
   const savedMsg = document.getElementById('savedMsg');
 
+  function isiAtauStrip(val){
+    return (val !== undefined && val !== null && val !== '') ? val : null;
+  }
+
   function renderSettings(){
     hargaTiketInput.value = currentSettings.hargaTiket || '';
+    kelasLombaInput.value = currentSettings.kelasLomba || '';
     jenisBurungInput.value = currentSettings.jenisBurung || '';
     pointMerahInput.value = currentSettings.pointMerah !== null && currentSettings.pointMerah !== undefined ? currentSettings.pointMerah : '';
+    pointRestartInput.value = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined ? currentSettings.pointRestart : '';
     document.getElementById('pointBiruTampil').textContent = pointTetap.biru;
     document.getElementById('pointKuningTampil').textContent = pointTetap.kuning;
+
+    setRingkasan('rHargaTiket', currentSettings.hargaTiket);
+    setRingkasan('rKelasLomba', currentSettings.kelasLomba);
+    setRingkasan('rJenisBurung', currentSettings.jenisBurung);
+    setRingkasan('rPointMerah', currentSettings.pointMerah, 'menunggu');
+    setRingkasan('rPointRestart', currentSettings.pointRestart, 'menunggu');
+    document.getElementById('rPointBiru').textContent = pointTetap.biru;
+    document.getElementById('rPointKuning').textContent = pointTetap.kuning;
+  }
+
+  function setRingkasan(id, val, placeholder){
+    const el = document.getElementById(id);
+    const isi = isiAtauStrip(val);
+    if(isi === null){
+      el.textContent = placeholder || '-';
+      el.classList.add('kosong');
+    } else {
+      el.textContent = isi;
+      el.classList.remove('kosong');
+    }
   }
 
   document.getElementById('btnSimpanSettings').addEventListener('click', () => {
     socket.emit('update-settings', {
       hargaTiket: hargaTiketInput.value,
+      kelasLomba: kelasLombaInput.value,
       jenisBurung: jenisBurungInput.value,
-      pointMerah: pointMerahInput.value
+      pointMerah: pointMerahInput.value,
+      pointRestart: pointRestartInput.value
     });
     savedMsg.classList.add('show');
     setTimeout(() => savedMsg.classList.remove('show'), 1800);
@@ -311,7 +436,11 @@
     const merahSiap = currentSettings.pointMerah !== null && currentSettings.pointMerah !== undefined;
     const skorMerah = merahSiap ? entry.stickMerah * currentSettings.pointMerah : null;
     const total = merahSiap ? (skorMerah + skorBiru + skorKuning) : null;
-    return { skorMerah, skorBiru, skorKuning, total };
+
+    const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined;
+    const hasilRestart = (merahSiap && restartSiap) ? (currentSettings.pointRestart - total) : null;
+
+    return { skorMerah, skorBiru, skorKuning, total, hasilRestart };
   }
 
   function renderTabel(){
@@ -320,12 +449,13 @@
       tabelBody.innerHTML = '<tr class="empty-row"><td colspan="14">Belum ada data masuk</td></tr>';
       return;
     }
-    dataPenilaian.forEach((entry, idx) => {
-      const { skorMerah, skorBiru, skorKuning, total } = hitungSkor(entry);
+    dataPenilaian.forEach((entry) => {
+      const { skorMerah, skorBiru, skorKuning, total, hasilRestart } = hitungSkor(entry);
+      const seimbang = hasilRestart === 0;
       const tr = document.createElement('tr');
       tr.dataset.id = entry.id;
+      if(seimbang) tr.classList.add('baris-seimbang');
       tr.innerHTML = `
-        <td>${idx + 1}</td>
         <td class="col-num">${entry.gantangan}</td>
         <td>${entry.sesi}</td>
         <td>${entry.desainBox}</td>
@@ -337,8 +467,9 @@
         <td class="col-num">${skorBiru}</td>
         <td class="col-num">${skorKuning}</td>
         <td class="col-num cell-total">${total === null ? '<span class="dash">-</span>' : total}</td>
+        <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">Seimbang</span>' : ''}</td>
         <td>${formatWaktu(entry.waktu)}</td>
-        <td><button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button></td>
+        <td class="kolom-aksi"><button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button></td>
       `;
       tabelBody.appendChild(tr);
     });
