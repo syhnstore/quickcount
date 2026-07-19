@@ -464,7 +464,12 @@
 
     const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined && currentSettings.pointRestart > 0;
     // Total skor dikurangi berulang kali dengan point restart (modulo) sampai tidak bisa dikurangi lagi
-    const hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
+    let hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
+    // Jika hasilnya sama persis dengan total (artinya total belum pernah berhasil dikurangi
+    // sama sekali oleh point restart), maka dianggap pas/seimbang -> 0, dan ini juaranya.
+    if(hasilRestart !== null && hasilRestart === total){
+      hasilRestart = 0;
+    }
 
     return { skorMerah, skorBiru, skorKuning, total, hasilRestart };
   }
