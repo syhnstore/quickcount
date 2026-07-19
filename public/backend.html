@@ -223,17 +223,17 @@
 
   /* ============ CETAK A4 ============ */
   @media print{
-    @page{ size: A4; margin: 10mm; }
+    @page{ size: A4; margin: 0.5cm; }
     body{ background:#fff; }
     .topbar, .actions, .settings-card, .btn-hapus-baris{ display:none !important; }
     .print-only{ display:block; }
     .wrap{ max-width:none; margin:0; padding:0; }
-    .ringkasan-wrap{ border:none; padding:0 0 10px; margin-bottom:10px; overflow:visible; }
-    table.ringkasan{ font-size:12px; min-width:0; }
-    table.ringkasan th, table.ringkasan td{ padding:6px 7px; }
+    .ringkasan-wrap{ border:none; padding:0 0 14px; margin-bottom:14px; overflow:visible; }
+    table.ringkasan{ font-size:14px; min-width:0; }
+    table.ringkasan th, table.ringkasan td{ padding:7px 8px; }
     .sheet-container{ border:none; overflow:visible; }
-    table.sheet{ font-size: 12px !important; min-width:0; }
-    table.sheet th, table.sheet td{ padding:6px 7px; }
+    table.sheet{ font-size: 14px !important; min-width:0; }
+    table.sheet th, table.sheet td{ padding:7px 8px; }
     th.kolom-aksi, td.kolom-aksi{ display:none !important; }
     table.sheet thead th{ position:static; }
   }
@@ -324,8 +324,7 @@
       <thead>
         <tr>
           <th>Gantangan</th>
-          <th>Sesi</th>
-          <th>Box</th>
+          <th>Tag</th>
           <th>Nama Juri</th>
           <th>Stick Merah</th>
           <th>Stick Biru</th>
@@ -335,12 +334,11 @@
           <th>Skor Kuning</th>
           <th>Total Skor</th>
           <th>Hasil Restart</th>
-          <th>Waktu</th>
           <th class="kolom-aksi">Aksi</th>
         </tr>
       </thead>
       <tbody id="tabelBody">
-        <tr class="empty-row"><td colspan="14">Belum ada data masuk</td></tr>
+        <tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>
       </tbody>
     </table>
   </div>
@@ -437,8 +435,9 @@
     const skorMerah = merahSiap ? entry.stickMerah * currentSettings.pointMerah : null;
     const total = merahSiap ? (skorMerah + skorBiru + skorKuning) : null;
 
-    const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined;
-    const hasilRestart = (merahSiap && restartSiap) ? (currentSettings.pointRestart - total) : null;
+    const restartSiap = currentSettings.pointRestart !== null && currentSettings.pointRestart !== undefined && currentSettings.pointRestart > 0;
+    // Total skor dikurangi berulang kali dengan point restart (modulo) sampai tidak bisa dikurangi lagi
+    const hasilRestart = (merahSiap && restartSiap) ? (total % currentSettings.pointRestart) : null;
 
     return { skorMerah, skorBiru, skorKuning, total, hasilRestart };
   }
@@ -446,7 +445,7 @@
   function renderTabel(){
     tabelBody.innerHTML = '';
     if(dataPenilaian.length === 0){
-      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="14">Belum ada data masuk</td></tr>';
+      tabelBody.innerHTML = '<tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>';
       return;
     }
     dataPenilaian.forEach((entry) => {
@@ -457,7 +456,6 @@
       if(seimbang) tr.classList.add('baris-seimbang');
       tr.innerHTML = `
         <td class="col-num">${entry.gantangan}</td>
-        <td>${entry.sesi}</td>
         <td>${entry.desainBox}</td>
         <td class="col-juri">${entry.juri}</td>
         <td class="col-num cell-merah">${entry.stickMerah}</td>
@@ -468,7 +466,6 @@
         <td class="col-num">${skorKuning}</td>
         <td class="col-num cell-total">${total === null ? '<span class="dash">-</span>' : total}</td>
         <td class="col-num cell-restart">${hasilRestart === null ? '<span class="dash">menunggu</span>' : hasilRestart}${seimbang ? '<span class="label-juara">Seimbang</span>' : ''}</td>
-        <td>${formatWaktu(entry.waktu)}</td>
         <td class="kolom-aksi"><button class="btn-hapus-baris" data-id="${entry.id}" title="Hapus baris ini">&#10005;</button></td>
       `;
       tabelBody.appendChild(tr);
