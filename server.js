@@ -9,7 +9,7 @@ const io = new Server(server);
 
 // ==================== KONFIGURASI (ubah sesuai kebutuhan) ====================
 // Daftar nama/kode juri yang boleh login.
-const DAFTAR_JURI = ['Juri 1', 'Juri 2', 'Juri 3', 'Juri 4'];
+const DAFTAR_JURI = ['Juri 1', 'Juri 2', 'Juri 3', 'Juri 4', 'Juri 5'];
 // Password bersama untuk semua juri. Ganti sebelum acara berlangsung.
 const PASSWORD_JURI = 'lovebird2026';
 
