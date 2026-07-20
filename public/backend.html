@@ -56,7 +56,7 @@
   }
   .qr-img-wrap{
     flex-shrink:0; width:120px; height:120px; border-radius:8px; overflow:hidden;
-    border:1px solid var(--line); background:#fafafa; display:flex; align-items:center; justify-content:center;
+    border:none; background:#fafafa; display:flex; align-items:center; justify-content:center;
   }
   .qr-img-wrap img{ width:100%; height:100%; display:block; }
   .qr-info{ flex:1; min-width:200px; }
@@ -135,7 +135,7 @@
     color:#999;
     margin-top:4px;
   }
-  .cari-field-wide .cari-row{ display:flex; gap:6px; margin-top:14px; }
+  .cari-field-wide .cari-row{ display:flex; gap:6px; }
   .cari-field-wide input{ flex:1; min-width:0; }
   .btn-cari-gantangan{
     flex-shrink:0; background: var(--teal-deep); color:#fff; border:none;
@@ -176,10 +176,11 @@
 
   /* Layout 2 kolom: form pengaturan (kiri) + kartu point (kanan) */
   .settings-flex{
-    display:flex;
+    display: flex;
     gap: 32px;
-    align-items:flex-start;
-    flex-wrap:wrap;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
   }
   .settings-left{ flex: 1 1 460px; min-width:280px; }
   .settings-right{ flex: 0 1 460px; min-width:260px; }
@@ -430,12 +431,11 @@
     <div class="qr-info">
       <h2>QR Kode Form Juri</h2>
       <p>Juri tinggal scan kode ini pakai kamera HP untuk langsung membuka halaman input penilaian, tidak perlu ketik alamat website manual.</p>
-      <div class="qr-link" id="qrLinkText">-</div>
+      <div class="qr-link" id="qrLinkText"><a href="#" target="_blank" id="qrLink">-</a></div>
     </div>
   </div>
 
   <div class="settings-card">
-    <h2>Pengaturan Kelas Lomba</h2>
     <div class="settings-flex">
       <div class="settings-left">
         <div class="settings-grid">
@@ -457,15 +457,15 @@
               <option value="LB. BALIBU DURASI">LB. BALIBU DURASI</option>
             </select>
           </div>
-        </div>
-
-        <div class="settings-field cari-field-wide">
-          <label for="cariGantangan">Cari No. Gantangan</label>
-          <div class="cari-row">
-            <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
-            <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
+          <div class="settings-field cari-field-wide">
+            <label for="cariGantangan">Cari No. Gantangan</label>
+            <div class="cari-row">
+              <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
+              <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
+            </div>
           </div>
         </div>
+
         <div class="cari-status" id="cariStatus">
           <span id="cariStatusText"></span>
           <button type="button" class="btn-tampilkan-semua" id="btnTampilkanSemua">Tampilkan Semua</button>
