@@ -698,11 +698,11 @@
     // Dihitung dari SELURUH data (bukan cuma yang sedang difilter/dicari), supaya konsisten.
     const hitungKemunculan = {};
     dataPenilaian.forEach(p => {
-      const kunci = p.gantangan + '|' + p.juri;
+      const kunci = p.gantangan + '|' + p.desainBox;
       hitungKemunculan[kunci] = (hitungKemunculan[kunci] || 0) + 1;
     });
     const idDuplikat = new Set(
-      dataPenilaian.filter(p => hitungKemunculan[p.gantangan + '|' + p.juri] > 1).map(p => p.id)
+      dataPenilaian.filter(p => hitungKemunculan[p.gantangan + '|' + p.desainBox] > 1).map(p => p.id)
     );
     const duplikatBanner = document.getElementById('duplikatBanner');
     const duplikatCount = document.getElementById('duplikatCount');
