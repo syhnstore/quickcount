@@ -135,8 +135,8 @@
     color:#999;
     margin-top:4px;
   }
-  .cari-field .cari-row{ display:flex; gap:6px; }
-  .cari-field input{ flex:1; min-width:0; }
+  .cari-field-wide .cari-row{ display:flex; gap:6px; margin-top:14px; }
+  .cari-field-wide input{ flex:1; min-width:0; }
   .btn-cari-gantangan{
     flex-shrink:0; background: var(--teal-deep); color:#fff; border:none;
     padding: 0 14px; border-radius: 7px; font-weight:700; cursor:pointer; font-size:0.95rem;
@@ -173,6 +173,85 @@
     transition: opacity 0.3s ease;
   }
   .saved-msg.show{ opacity:1; }
+
+  /* Layout 2 kolom: form pengaturan (kiri) + kartu point (kanan) */
+  .settings-flex{
+    display:flex;
+    gap: 32px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  .settings-left{ flex: 1 1 460px; min-width:280px; }
+  .settings-right{ flex: 0 1 460px; min-width:260px; }
+
+  .point-title{
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    font-weight:800;
+    text-align:center;
+    color: var(--ink);
+  }
+  .point-cards{
+    display:flex;
+    gap: 12px;
+  }
+  .point-card{
+    flex:1;
+    border-radius: 10px;
+    overflow:hidden;
+    text-align:center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    background:#B9BFC2;
+    min-width:0;
+  }
+  .pc-label{
+    background:#8E9497;
+    color:#fff;
+    font-weight:800;
+    font-size:0.78rem;
+    letter-spacing:0.03em;
+    padding:8px 4px;
+  }
+  .pc-value{
+    padding: 18px 6px;
+    font-size:1.7rem;
+    font-weight:800;
+    color:#fff;
+  }
+  .pc-value-input{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding: 15px 6px;
+    font-size:1.7rem;
+    font-weight:800;
+    color:#fff;
+    text-align:center;
+    background:transparent;
+    border:none;
+    outline:none;
+    font-family:inherit;
+    -moz-appearance:textfield;
+  }
+  .pc-value-input::-webkit-outer-spin-button,
+  .pc-value-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .pc-value-input::placeholder{ color:rgba(255,255,255,0.85); font-style:italic; font-weight:700; font-size:1.1rem; }
+  .pc-value-input:focus{ background:rgba(255,255,255,0.15); }
+  .point-card:has(.pc-value-input:focus){ outline:3px solid var(--gold); outline-offset:2px; }
+  .pc-restart{ background:#3CC77E; }
+  .pc-restart .pc-label{ background:#2FA167; }
+  .pc-merah{ background:#D93A3A; }
+  .pc-merah .pc-label{ background:#B32E2E; }
+  .pc-biru{ background:#2C6FD1; }
+  .pc-biru .pc-label{ background:#22579F; }
+  .pc-kuning{ background:#D8C22A; }
+  .pc-kuning .pc-label{ background:#B29E1E; }
+  .pc-value.kosong{ font-style:italic; font-size:1.15rem; opacity:0.9; }
+
+  @media (max-width: 640px){
+    .point-cards{ flex-wrap:wrap; }
+    .point-card{ flex: 1 1 calc(50% - 6px); }
+  }
 
   /* Ringkasan pengaturan (tampil di layar + jadi tabel saat dicetak) */
   .ringkasan-wrap{
@@ -303,6 +382,8 @@
     .wrap{ padding: 0 0 40px; margin: 14px; }
     .settings-card, .ringkasan-wrap{ padding: 14px; }
     .settings-grid{ grid-template-columns: 1fr 1fr; }
+    .settings-flex{ gap: 20px; }
+    .point-title{ font-size:0.95rem; }
   }
   @media (min-width: 1024px){
     .wrap{ padding: 0 0px 20px; }
@@ -355,58 +436,69 @@
 
   <div class="settings-card">
     <h2>Pengaturan Kelas Lomba</h2>
-    <div class="settings-grid">
-      <div class="settings-field">
-        <label for="hargaTiket">Harga Tiket</label>
-        <input type="text" id="hargaTiket" placeholder="Contoh: Rp 10.000">
+    <div class="settings-flex">
+      <div class="settings-left">
+        <div class="settings-grid">
+          <div class="settings-field">
+            <label for="hargaTiket">Harga Tiket</label>
+            <input type="text" id="hargaTiket" placeholder="Contoh: Rp 10.000">
+          </div>
+          <div class="settings-field">
+            <label for="kelasLomba">Kelas Lomba</label>
+            <input type="text" id="kelasLomba" placeholder="Contoh: TPS 2XP ...">
+          </div>
+          <div class="settings-field">
+            <label for="jenisBurung">Jenis Burung</label>
+            <select id="jenisBurung">
+              <option value="">Pilih jenis burung</option>
+              <option value="LB. BEBAS AKSI">LB. BEBAS AKSI</option>
+              <option value="LB. FIGHTER RC">LB. FIGHTER RC</option>
+              <option value="LB. BALIBU PROSPEK">LB. BALIBU PROSPEK</option>
+              <option value="LB. BALIBU DURASI">LB. BALIBU DURASI</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-field cari-field-wide">
+          <label for="cariGantangan">Cari No. Gantangan</label>
+          <div class="cari-row">
+            <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
+            <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
+          </div>
+        </div>
+        <div class="cari-status" id="cariStatus">
+          <span id="cariStatusText"></span>
+          <button type="button" class="btn-tampilkan-semua" id="btnTampilkanSemua">Tampilkan Semua</button>
+        </div>
+
+        <button class="btn-simpan" id="btnSimpanSettings">Simpan Pengaturan</button>
+        <span class="saved-msg" id="savedMsg">Tersimpan</span>
       </div>
-      <div class="settings-field">
-        <label for="kelasLomba">Kelas Lomba</label>
-        <input type="text" id="kelasLomba" placeholder="Contoh: TPS 2XP ...">
-      </div>
-      <div class="settings-field">
-        <label for="jenisBurung">Jenis Burung</label>
-        <select id="jenisBurung">
-          <option value="">Pilih jenis burung</option>
-          <option value="LB. BEBAS AKSI">LB. BEBAS AKSI</option>
-          <option value="LB. FIGHTER RC">LB. FIGHTER RC</option>
-          <option value="LB. BALIBU PROSPEK">LB. BALIBU PROSPEK</option>
-          <option value="LB. BALIBU DURASI">LB. BALIBU DURASI</option>
-        </select>
-      </div>
-      <div class="settings-field">
-        <label for="pointMerah">Point Merah</label>
-        <input type="number" id="pointMerah" placeholder="Isi setelah kocok manual">
-        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
-      </div>
-      <div class="settings-field">
-        <label for="pointRestart">Point Restart</label>
-        <input type="number" id="pointRestart" placeholder="Isi setelah kocok manual">
-        <!--div class="hint">Kosongkan sampai pengocokan selesai</div-->
-      </div>
-      <div class="settings-field">
-        <label>Point Biru</label>
-        <div class="tetap" id="pointBiruTampil">40</div>
-      </div>
-      <div class="settings-field">
-        <label>Point Kuning</label>
-        <div class="tetap" id="pointKuningTampil">10</div>
-      </div>
-      <div class="settings-field cari-field">
-        <label for="cariGantangan">Cari No. Gantangan</label>
-        <div class="cari-row">
-          <input type="number" id="cariGantangan" min="1" max="60" placeholder="Contoh: 14">
-          <button type="button" class="btn-cari-gantangan" id="btnCariGantangan" title="Cari data gantangan ini">&#128269;</button>
+
+      <div class="settings-right">
+        <h3 class="point-title">Masukkan Nilai Point Disini</h3>
+        <div class="point-cards">
+          <div class="point-card pc-restart">
+            <div class="pc-label">RESTART</div>
+            <input type="number" class="pc-value-input" id="pointRestart" placeholder="Isi" min="0" inputmode="decimal">
+          </div>
+          <div class="point-card pc-merah">
+            <div class="pc-label">MERAH</div>
+            <input type="number" class="pc-value-input" id="pointMerah" placeholder="Isi" min="0" inputmode="decimal">
+          </div>
+          <div class="point-card pc-biru">
+            <div class="pc-label">BIRU</div>
+            <div class="pc-value" id="pointBiruTampil">40</div>
+          </div>
+          <div class="point-card pc-kuning">
+            <div class="pc-label">KUNING</div>
+            <div class="pc-value" id="pointKuningTampil">10</div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="cari-status" id="cariStatus">
-      <span id="cariStatusText"></span>
-      <button type="button" class="btn-tampilkan-semua" id="btnTampilkanSemua">Tampilkan Semua</button>
-    </div>
-    <button class="btn-simpan" id="btnSimpanSettings">Simpan Pengaturan</button>
-    <span class="saved-msg" id="savedMsg">Tersimpan</span>
   </div>
+
 
   <div class="ringkasan-wrap">
     <h2 class="print-only" style="display:block; font-size:1.3rem; margin:0 0 2px;">KW8 ARENA - REKAP DIGITAL LOVEBIRD</h2>
@@ -439,7 +531,7 @@
 
   <div class="ringkasan-wrap">
     <div class="duplikat-banner no-print" id="duplikatBanner">
-      <span>&#9888;&#65039; <strong id="duplikatCount">0</strong> kemungkinan data duplikat terdeteksi (juri yang sama input gantangan yang sama lebih dari sekali). Baris ditandai garis oranye di tabel bawah.</span>
+      <span>&#9888;&#65039; <strong id="duplikatCount">0</strong> kemungkinan data duplikat terdeteksi (nomor gantangan & tag yang sama muncul lebih dari sekali). Baris ditandai garis oranye di tabel bawah.</span>
     </div>
     <div class="sheet-container">
       <table class="sheet">
@@ -610,6 +702,14 @@
     document.getElementById('rPointKuning').textContent = pointTetap.kuning;
   }
 
+  function cegahNilaiNegatif(input){
+    input.addEventListener('change', () => {
+      if(input.value !== '' && parseFloat(input.value) < 0) input.value = 0;
+    });
+  }
+  cegahNilaiNegatif(pointRestartInput);
+  cegahNilaiNegatif(pointMerahInput);
+
   function setRingkasan(id, val, placeholder){
     const el = document.getElementById(id);
     const isi = isiAtauStrip(val);
@@ -694,7 +794,8 @@
       return;
     }
 
-    // Deteksi duplikat: juri yang sama input gantangan yang sama lebih dari sekali.
+    // Deteksi duplikat: nomor gantangan & tag yang sama muncul lebih dari sekali
+    // (siapapun jurinya, tidak dihitung sebagai pembeda).
     // Dihitung dari SELURUH data (bukan cuma yang sedang difilter/dicari), supaya konsisten.
     const hitungKemunculan = {};
     dataPenilaian.forEach(p => {
@@ -724,8 +825,8 @@
       if(duplikat) tr.classList.add('baris-duplikat');
       tr.innerHTML = `
         <td class="col-num">${entry.gantangan}</td>
-        <td>${entry.desainBox}</td>
-        <td class="col-juri">${entry.juri}${duplikat ? '<span class="label-duplikat">DUPLIKAT</span>' : ''}</td>
+        <td>${entry.desainBox}${duplikat ? '<span class="label-duplikat">DUPLIKAT</span>' : ''}</td>
+        <td class="col-juri">${entry.juri}</td>
         <td class="col-num cell-merah">${entry.stickMerah}</td>
         <td class="col-num cell-biru">${entry.stickBiru}</td>
         <td class="col-num cell-kuning">${entry.stickKuning}</td>
