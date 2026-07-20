@@ -47,6 +47,38 @@
   }
   .btn-print{ background: var(--gold); color: var(--teal-deep); }
   .btn-reset{ background:#F1EEE4; color: var(--merah); }
+  .btn-suara{ background:#2F5C50; color:#F3D9A6; }
+  .btn-suara.mati{ background:#3A4444; color:#9AA; }
+
+  .qr-card{
+    background:#fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 18px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  }
+  .qr-img-wrap{
+    flex-shrink:0; width:120px; height:120px; border-radius:8px; overflow:hidden;
+    border:1px solid var(--line); background:#fafafa; display:flex; align-items:center; justify-content:center;
+  }
+  .qr-img-wrap img{ width:100%; height:100%; display:block; }
+  .qr-info{ flex:1; min-width:200px; }
+  .qr-info h2{ margin:0 0 6px; font-size:1rem; color: var(--teal-deep); }
+  .qr-info p{ margin:0 0 8px; font-size:0.82rem; color:#7A7264; }
+  .qr-link{
+    font-size:0.78rem; color: var(--teal-mid); font-weight:700; word-break:break-all;
+    background: var(--sheet-header); padding:6px 10px; border-radius:6px; display:inline-block;
+  }
+
+  .duplikat-banner{
+    display:none; align-items:center; gap:10px; flex-wrap:wrap;
+    background:#FFF1E8; border:1px solid #F0B088; border-radius:8px;
+    padding:10px 14px; margin-bottom:14px; font-size:0.85rem; color:#8A4A1E;
+  }
+  .duplikat-banner.show{ display:flex; }
+  .duplikat-banner strong{ color:#B5451A; }
+  table.sheet tbody tr.baris-duplikat{ outline: 2px solid #E0761F; outline-offset: -2px; }
+  .label-duplikat{
+    display:inline-block; margin-left:4px; font-size:0.68rem; background:#E0761F; color:#fff;
+    padding:1px 5px; border-radius:8px;
+  }
 
   .wrap{
     max-width: 100%;
@@ -281,7 +313,7 @@
   @media print{
     @page{ size: A4; margin: 0.5cm; }
     body{ background:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;}
-    .topbar, .actions, .settings-card, .btn-hapus-baris, .btn-edit-baris, .overlay-edit{ display:none !important; }
+    .topbar, .actions, .settings-card, .btn-hapus-baris, .btn-edit-baris, .overlay-edit, .no-print{ display:none !important; }
     .print-only{ display:block; }
     .wrap{ max-width:none; margin:0; padding:0; }
     .ringkasan-wrap{ border:none; padding:0 0 14px; margin-bottom:14px; overflow:visible; }
@@ -302,12 +334,24 @@
   <h1>Backend - Quick Count</h1>
   <div class="status" id="statusText">Menghubungkan...</div>
   <div class="actions">
+    <button class="btn-suara" id="btnSuara" title="Aktif/nonaktifkan notifikasi suara">&#128266; Suara</button>
     <button class="btn-print" id="btnPrint">Cetak (A4)</button>
     <button class="btn-reset" id="btnReset">Reset Semua Data</button>
   </div>
 </div>
 
 <div class="wrap">
+
+  <div class="qr-card no-print" id="qrCard">
+    <div class="qr-img-wrap">
+      <img id="qrImg" alt="QR Code Form Juri" width="120" height="120">
+    </div>
+    <div class="qr-info">
+      <h2>QR Kode Form Juri</h2>
+      <p>Juri tinggal scan kode ini pakai kamera HP untuk langsung membuka halaman input penilaian, tidak perlu ketik alamat website manual.</p>
+      <div class="qr-link" id="qrLinkText">-</div>
+    </div>
+  </div>
 
   <div class="settings-card">
     <h2>Pengaturan Kelas Lomba</h2>
@@ -394,6 +438,9 @@
   </div>
 
   <div class="ringkasan-wrap">
+    <div class="duplikat-banner no-print" id="duplikatBanner">
+      <span>&#9888;&#65039; <strong id="duplikatCount">0</strong> kemungkinan data duplikat terdeteksi (juri yang sama input gantangan yang sama lebih dari sekali). Baris ditandai garis oranye di tabel bawah.</span>
+    </div>
     <div class="sheet-container">
       <table class="sheet">
         <thead>
@@ -473,6 +520,52 @@
   const statusText = document.getElementById('statusText');
   socket.on('connect', () => statusText.textContent = 'Terhubung - live update aktif');
   socket.on('disconnect', () => statusText.textContent = 'Terputus, mencoba menghubungkan ulang...');
+
+  // ============ QR CODE FORM JURI ============
+  (function(){
+    const urlForm = window.location.origin + '/';
+    const qrImg = document.getElementById('qrImg');
+    qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(urlForm);
+    document.getElementById('qrLinkText').textContent = urlForm;
+  })();
+
+  // ============ NOTIFIKASI SUARA ============
+  let suaraAktif = localStorage.getItem('suaraAktif') !== 'off';
+  const btnSuara = document.getElementById('btnSuara');
+
+  function perbaruiTombolSuara(){
+    btnSuara.innerHTML = suaraAktif ? '&#128266; Suara' : '&#128263; Suara';
+    btnSuara.classList.toggle('mati', !suaraAktif);
+  }
+  perbaruiTombolSuara();
+
+  btnSuara.addEventListener('click', () => {
+    suaraAktif = !suaraAktif;
+    localStorage.setItem('suaraAktif', suaraAktif ? 'on' : 'off');
+    perbaruiTombolSuara();
+    if(suaraAktif) mainkanBunyi(); // beri contoh bunyi begitu diaktifkan
+  });
+
+  let audioCtx = null;
+  function mainkanBunyi(){
+    if(!suaraAktif) return;
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = audioCtx.currentTime;
+      [880, 1175].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, t0 + i*0.13);
+        gain.gain.exponentialRampToValueAtTime(0.22, t0 + i*0.13 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + i*0.13 + 0.16);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t0 + i*0.13);
+        osc.stop(t0 + i*0.13 + 0.18);
+      });
+    } catch(e){ /* abaikan kalau browser memblokir audio otomatis */ }
+  }
 
   let currentSettings = { hargaTiket:'', kelasLomba:'', jenisBurung:'', pointMerah:null, pointRestart:null };
   let pointTetap = { biru:40, kuning:10 };
@@ -593,23 +686,46 @@
 
     if(dataPenilaian.length === 0){
       tabelBody.innerHTML = '<tr class="empty-row"><td colspan="12">Belum ada data masuk</td></tr>';
+      document.getElementById('duplikatBanner').classList.remove('show');
       return;
     }
     if(sumberData.length === 0){
       tabelBody.innerHTML = `<tr class="empty-row"><td colspan="12">Data untuk No. Gantangan ${filterGantangan} tidak ditemukan.</td></tr>`;
       return;
     }
+
+    // Deteksi duplikat: juri yang sama input gantangan yang sama lebih dari sekali.
+    // Dihitung dari SELURUH data (bukan cuma yang sedang difilter/dicari), supaya konsisten.
+    const hitungKemunculan = {};
+    dataPenilaian.forEach(p => {
+      const kunci = p.gantangan + '|' + p.juri;
+      hitungKemunculan[kunci] = (hitungKemunculan[kunci] || 0) + 1;
+    });
+    const idDuplikat = new Set(
+      dataPenilaian.filter(p => hitungKemunculan[p.gantangan + '|' + p.juri] > 1).map(p => p.id)
+    );
+    const duplikatBanner = document.getElementById('duplikatBanner');
+    const duplikatCount = document.getElementById('duplikatCount');
+    if(idDuplikat.size > 0){
+      duplikatCount.textContent = idDuplikat.size;
+      duplikatBanner.classList.add('show');
+    } else {
+      duplikatBanner.classList.remove('show');
+    }
+
     sumberData.forEach((entry) => {
       const { skorMerah, skorBiru, skorKuning, total, hasilRestart } = hitungSkor(entry);
       const seimbang = hasilRestart === 0;
+      const duplikat = idDuplikat.has(entry.id);
       const tr = document.createElement('tr');
       tr.dataset.id = entry.id;
       if(seimbang) tr.classList.add('baris-seimbang');
       if(entry.ditandai) tr.classList.add('baris-ditandai');
+      if(duplikat) tr.classList.add('baris-duplikat');
       tr.innerHTML = `
         <td class="col-num">${entry.gantangan}</td>
         <td>${entry.desainBox}</td>
-        <td class="col-juri">${entry.juri}</td>
+        <td class="col-juri">${entry.juri}${duplikat ? '<span class="label-duplikat">DUPLIKAT</span>' : ''}</td>
         <td class="col-num cell-merah">${entry.stickMerah}</td>
         <td class="col-num cell-biru">${entry.stickBiru}</td>
         <td class="col-num cell-kuning">${entry.stickKuning}</td>
@@ -690,6 +806,7 @@
   socket.on('penilaian-baru', (entry) => {
     dataPenilaian.push(entry);
     renderTabel();
+    mainkanBunyi();
   });
 
   socket.on('penilaian-dihapus', (id) => {
